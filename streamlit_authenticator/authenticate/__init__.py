@@ -217,11 +217,11 @@ class Authenticate:
         button_name: str
             Rendered name of the logout button.
         location: str
-            Location of the logout button i.e. main or sidebar or unrendered.
+            Location of the logout button i.e. main, sidebar or unrendered.
         key: str
             Unique key to be used in multi-page applications.
         """
-        if location not in ['main', 'sidebar','unrendered']:
+        if location not in ['main', 'sidebar', 'unrendered']:
             raise ValueError("Location must be one of 'main' or 'sidebar' or 'unrendered'")
         if location == 'main':
             if st.button(button_name, key):

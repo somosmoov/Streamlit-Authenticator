@@ -44,8 +44,7 @@ class Validator:
         bool
             Validity of entered name.
         """
-        pattern = r"^[A-Za-z ]+$"
-        return 1 <= len(name) <= 100 and bool(re.match(pattern, name))
+        return 1 <= len(name) <= 100
     def validate_length(self, variable: str, min_length: int=0, max_length: int=100) -> bool:
         """
         Checks the length of a variable.
