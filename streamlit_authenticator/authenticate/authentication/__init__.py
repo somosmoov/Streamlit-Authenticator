@@ -7,7 +7,7 @@ Libraries imported:
 - typing: Module implementing standard typing notations for Python functions.
 """
 
-from typing import Optional
+from typing import Optional, List, Tuple
 import streamlit as st
 
 from ...utilities.hasher import Hasher
@@ -281,9 +281,9 @@ class AuthenticationHandler:
              'logged_in': False}
         if pre_authorization:
             self.pre_authorized['emails'].remove(email)
-    def register_user(self, new_password: str, new_password_repeat: str, pre_authorization: bool,
-                      new_username: str, new_name: str, new_email: str,
-                      domains: Optional[list]=None) -> tuple:
+def register_user(self, new_username: str, new_name: str, new_email: str,
+                  new_password: str, new_password_repeat: str, pre_authorization: bool,
+                  captcha: Optional[Tuple[str, str]]=None, domains: Optional[List[str]]=None) -> tuple:
         """
         Validates a new user's username, password, and email. Subsequently adds the validated user 
         details to the credentials dictionary.
@@ -303,6 +303,8 @@ class AuthenticationHandler:
             Name of the new user.
         new_email: str
             Email of the new user.
+        captcha: tuple
+            Tuple containing the captcha generated digit and the user entered digit to validate.
         domains: list
             Required list of domains a new email must belong to i.e. ['gmail.com', 'yahoo.com'], 
             list: the required list of domains, None: any domain is allowed.
@@ -317,6 +319,9 @@ class AuthenticationHandler:
             raise RegisterError('Password/repeat password fields cannot be empty')
         if new_password != new_password_repeat:
             raise RegisterError('Passwords do not match')
+        if captcha:
+            if captcha[0] != captcha[1]:
+              raise RegisterError('Captcha entered incorrectly')
         if pre_authorization:
             if new_email in self.pre_authorized['emails']:
                 self._register_credentials(new_username, new_name, new_password, new_email,
