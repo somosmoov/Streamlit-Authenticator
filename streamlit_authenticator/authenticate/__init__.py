@@ -312,8 +312,9 @@ class Authenticate:
                                                  else fields['Register']):
             return self.authentication_handler.register_user(new_password, new_password_repeat,
                                                              pre_authorization, new_username,
-                                                             new_name, new_email, domains,
-                                                             (random_digit, entered_captcha))
+                                                             new_name, new_email,
+                                                             (random_digit, entered_captcha),
+                                                             domains)
         return None, None, None
     def reset_password(self, username: str, location: str='main', fields: dict=None,
                        clear_on_submit: bool=False) -> bool:
