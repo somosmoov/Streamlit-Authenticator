@@ -306,15 +306,13 @@ class Authenticate:
             entered_captcha = register_user_form.text_input('Captcha' if 'Captcha' not in fields
                                                             else fields['Captcha'])
             register_user_form.image(captcha)
-        else:
-            random_digit, entered_captcha = None, None
         if register_user_form.form_submit_button('Register' if 'Register' not in fields
                                                  else fields['Register']):
             return self.authentication_handler.register_user(new_password, new_password_repeat,
                                                              pre_authorization, new_username,
                                                              new_name, new_email,
-                                                             (random_digit, entered_captcha),
-                                                             domains)
+                                                             (random_digit, entered_captcha) if captcha
+                                                             else None, domains)
         return None, None, None
     def reset_password(self, username: str, location: str='main', fields: dict=None,
                        clear_on_submit: bool=False) -> bool:
