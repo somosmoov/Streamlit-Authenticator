@@ -14,6 +14,7 @@ from typing import Optional
 import streamlit as st
 
 from ..utilities.validator import Validator
+from ..utilities.helpers import generate_captcha
 from ..utilities.exceptions import DeprecationError
 
 from .cookie import CookieHandler
@@ -237,7 +238,7 @@ class Authenticate:
                 self.cookie_handler.delete_cookie()
     def register_user(self, location: str='main', pre_authorization: bool=True,
                       domains: Optional[list]=None, fields: dict=None,
-                      clear_on_submit: bool=False) -> tuple:
+                      clear_on_submit: bool=False, captcha: bool=True) -> tuple:
         """
         Creates a register new user widget.
 
@@ -255,6 +256,8 @@ class Authenticate:
             Rendered names of the fields/buttons.
         clear_on_submit: bool
             Clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
+        captcha: bool
+            Captcha requirement for registration, True: valid captcha required, False: captcha removed.
 
         Returns
         -------
@@ -268,7 +271,7 @@ class Authenticate:
         if fields is None:
             fields = {'Form name':'Register user', 'Email':'Email', 'Username':'Username',
                       'Password':'Password', 'Repeat password':'Repeat password',
-                      'Register':'Register'}
+                      'Register':'Register', 'Captcha':'Captcha'}
         if pre_authorization:
             if not self.authentication_handler.pre_authorized:
                 raise ValueError("pre-authorization argument must not be None")
@@ -298,11 +301,19 @@ class Authenticate:
                                                             if 'Repeat password' not in fields
                                                             else fields['Repeat password'],
                                                             type='password')
+        if captcha:
+            random_digit, captcha = generate_captcha()
+            entered_captcha = register_user_form.text_input('Captcha' if 'Captcha' not in fields
+                                                            else fields['Captcha'])
+            register_user_form.image(captcha)
+        else:
+            random_digit, entered_captcha = None, None
         if register_user_form.form_submit_button('Register' if 'Register' not in fields
                                                  else fields['Register']):
             return self.authentication_handler.register_user(new_password, new_password_repeat,
                                                              pre_authorization, new_username,
-                                                             new_name, new_email, domains)
+                                                             new_name, new_email, domains,
+                                                             (random_digit, entered_captcha))
         return None, None, None
     def reset_password(self, username: str, location: str='main', fields: dict=None,
                        clear_on_submit: bool=False) -> bool:
