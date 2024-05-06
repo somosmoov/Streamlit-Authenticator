@@ -31,7 +31,7 @@ class Helpers:
             The randomly generated captcha object.
         """
         image = ImageCaptcha(width=120, height=75)
-        random_digit = random.choices(string.digits, k=4)
+        random_digit = ''.join(random.choices(string.digits, k=4))
         return random_digit, image.generate(random_digit)
     @classmethod
     def generate_random_pw(cls, length: int=16) -> str:
