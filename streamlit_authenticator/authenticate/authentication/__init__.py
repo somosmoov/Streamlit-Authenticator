@@ -10,10 +10,10 @@ Libraries imported:
 from typing import Optional, List, Tuple
 import streamlit as st
 
-from ...utilities.hasher import Hasher
-from ...utilities.validator import Validator
-from ...utilities.helpers import Helpers
-from ...utilities.exceptions import (CredentialsError,
+from utilities.hasher import Hasher
+from utilities.validator import Validator
+from utilities.helpers import Helpers
+from utilities.exceptions import (CredentialsError,
                                   ForgotError,
                                   LoginError,
                                   RegisterError,
@@ -46,7 +46,6 @@ class AuthenticationHandler:
                                             for key, value in credentials['usernames'].items()
                                             }
         self.validator                  =   validator if validator is not None else Validator()
-        self.random_password            =   None
         for username, _ in self.credentials['usernames'].items():
             if 'logged_in' not in self.credentials['usernames'][username]:
                 self.credentials['usernames'][username]['logged_in'] = False
@@ -281,9 +280,9 @@ class AuthenticationHandler:
              'logged_in': False}
         if pre_authorization:
             self.pre_authorized['emails'].remove(email)
-def register_user(self, new_username: str, new_name: str, new_email: str,
-                  new_password: str, new_password_repeat: str, pre_authorization: bool,
-                  captcha: Optional[Tuple[str, str]]=None, domains: Optional[List[str]]=None) -> tuple:
+    def register_user(self, new_password: str, new_password_repeat: str, pre_authorization: bool,
+                    new_username: str, new_name: str, new_email: str,
+                    entered_captcha: str, domains: Optional[List[str]]=None) -> tuple:
         """
         Validates a new user's username, password, and email. Subsequently adds the validated user 
         details to the credentials dictionary.
@@ -303,8 +302,8 @@ def register_user(self, new_username: str, new_name: str, new_email: str,
             Name of the new user.
         new_email: str
             Email of the new user.
-        captcha: tuple
-            Tuple containing the captcha generated digit and the user entered digit to validate.
+        entered_captcha: str
+            User entered captcha to validate against the generated captcha.
         domains: list
             Required list of domains a new email must belong to i.e. ['gmail.com', 'yahoo.com'], 
             list: the required list of domains, None: any domain is allowed.
@@ -319,21 +318,19 @@ def register_user(self, new_username: str, new_name: str, new_email: str,
             raise RegisterError('Password/repeat password fields cannot be empty')
         if new_password != new_password_repeat:
             raise RegisterError('Passwords do not match')
-        if captcha:
-            if captcha[0] != captcha[1]:
-              raise RegisterError('Captcha entered incorrectly')
+        if entered_captcha or entered_captcha == '':
+            if entered_captcha != st.session_state['generated_captcha']:
+                raise RegisterError('Captcha entered incorrectly')
+            del st.session_state['generated_captcha']
         if pre_authorization:
             if new_email in self.pre_authorized['emails']:
                 self._register_credentials(new_username, new_name, new_password, new_email,
                                             pre_authorization, domains)
                 return new_email, new_username, new_name
-            else:
-                raise RegisterError('User not pre-authorized to register')
-        else:
-            self._register_credentials(new_username, new_name, new_password, new_email,
-                                        pre_authorization, domains)
-            return new_email, new_username, new_name
-
+            raise RegisterError('User not pre-authorized to register')
+        self._register_credentials(new_username, new_name, new_password, new_email,
+                                    pre_authorization, domains)
+        return new_email, new_username, new_name
     def reset_password(self, username: str, password: str, new_password: str,
                        new_password_repeat: str) -> bool:
         """
@@ -382,10 +379,10 @@ def register_user(self, new_username: str, new_name: str, new_email: str,
         str
             New plain text password that should be transferred to the user securely.
         """
-        self.random_password = Helpers.generate_random_pw()
+        random_password = Helpers.generate_random_pw()
         self.credentials['usernames'][username]['password'] = \
-            Hasher([self.random_password]).generate()[0]
-        return self.random_password
+            Hasher([random_password]).generate()[0]
+        return random_password
     def _update_entry(self, username: str, key: str, value: str):
         """
         Updates the credentials dictionary with the user's updated entry.
@@ -446,4 +443,3 @@ def register_user(self, new_username: str, new_name: str, new_email: str,
             return True
         else:
             raise UpdateError('New and current values are the same')
-        

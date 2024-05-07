@@ -12,15 +12,15 @@ import streamlit as st
 import streamlit.components.v1 as components
 from yaml.loader import SafeLoader
 
-from .authenticate import Authenticate
-from .utilities.exceptions import (CredentialsError,
+from authenticate import Authenticate
+from utilities.exceptions import (CredentialsError,
                                   ForgotError,
                                   LoginError,
                                   RegisterError,
                                   ResetError,
                                   UpdateError)
 
-_RELEASE = True
+_RELEASE = False
 
 if not _RELEASE:
     # Loading config file

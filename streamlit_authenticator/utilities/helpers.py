@@ -5,11 +5,13 @@ library.
 Libraries imported:
 - string: Module providing support for ASCII character encoding.
 - random: Module generating random characters.
+- streamlit: Framework used to build pure Python web applications.
 - captcha: Module generating captcha images.
 """
 
 import string
 import random
+import streamlit as st
 from captcha.image import ImageCaptcha
 
 class Helpers:
@@ -31,8 +33,9 @@ class Helpers:
             The randomly generated captcha object.
         """
         image = ImageCaptcha(width=120, height=75)
-        random_digit = ''.join(random.choices(string.digits, k=4))
-        return random_digit, image.generate(random_digit)
+        if 'generated_captcha' not in st.session_state:
+            st.session_state['generated_captcha'] = ''.join(random.choices(string.digits, k=4))
+        return image.generate(st.session_state['generated_captcha'])
     @classmethod
     def generate_random_pw(cls, length: int=16) -> str:
         """

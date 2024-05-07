@@ -13,9 +13,9 @@ import time
 from typing import Optional
 import streamlit as st
 
-from ..utilities.validator import Validator
-from ..utilities.helpers import generate_captcha
-from ..utilities.exceptions import DeprecationError
+from utilities.helpers import Helpers
+from utilities.validator import Validator
+from utilities.exceptions import DeprecationError
 
 from .cookie import CookieHandler
 from .authentication import AuthenticationHandler
@@ -257,7 +257,7 @@ class Authenticate:
         clear_on_submit: bool
             Clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
         captcha: bool
-            Captcha requirement for registration, True: valid captcha required, False: captcha removed.
+            Captcha requirement for registration, True: captcha required, False: captcha removed.
 
         Returns
         -------
@@ -302,17 +302,18 @@ class Authenticate:
                                                             else fields['Repeat password'],
                                                             type='password')
         if captcha:
-            random_digit, captcha = generate_captcha()
+            captcha_image = Helpers.generate_captcha()
             entered_captcha = register_user_form.text_input('Captcha' if 'Captcha' not in fields
                                                             else fields['Captcha'])
-            register_user_form.image(captcha)
+            register_user_form.image(captcha_image)
+        else:
+            entered_captcha = None
         if register_user_form.form_submit_button('Register' if 'Register' not in fields
                                                  else fields['Register']):
             return self.authentication_handler.register_user(new_password, new_password_repeat,
                                                              pre_authorization, new_username,
-                                                             new_name, new_email,
-                                                             (random_digit, entered_captcha) if captcha
-                                                             else None, domains)
+                                                             new_name, new_email, entered_captcha,
+                                                             domains)
         return None, None, None
     def reset_password(self, username: str, location: str='main', fields: dict=None,
                        clear_on_submit: bool=False) -> bool:
