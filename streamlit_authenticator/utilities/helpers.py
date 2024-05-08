@@ -23,7 +23,8 @@ class Helpers:
     @classmethod
     def generate_captcha(cls, captcha_name: str) -> tuple:
         """
-        Generates a captcha image.
+        Generates a captcha image and stores the associated captcha string in the
+        session state.
 
         Parameters
         ----------
