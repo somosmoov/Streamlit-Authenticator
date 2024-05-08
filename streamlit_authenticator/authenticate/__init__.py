@@ -55,7 +55,7 @@ class Authenticate:
                                                           cookie_key,
                                                           cookie_expiry_days)
 
-    def forgot_password(self, location: str='main', fields: dict=None,
+    def forgot_password(self, location: str='main', fields: Optional[dict]=None,
                         clear_on_submit: bool=False) -> tuple:
         """
         Creates a forgot password widget.
@@ -102,7 +102,7 @@ class Authenticate:
                                                    else fields['Submit']):
             return self.authentication_handler.forgot_password(username)
         return None, None, None
-    def forgot_username(self, location: str='main', fields: dict=None,
+    def forgot_username(self, location: str='main', fields: Optional[dict]=None,
                         clear_on_submit: bool=False) -> tuple:
         """
         Creates a forgot username widget.
@@ -147,7 +147,7 @@ class Authenticate:
             return self.authentication_handler.forgot_username(email)
         return None, email
     def login(self, location: str='main', max_concurrent_users: Optional[int]=None,
-              max_login_attempts: Optional[int]=None, fields: dict=None,
+              max_login_attempts: Optional[int]=None, fields: Optional[dict]=None,
               clear_on_submit: bool=False) -> tuple:
         """
         Creates a login widget.
@@ -238,7 +238,7 @@ class Authenticate:
                 self.authentication_handler.execute_logout()
                 self.cookie_handler.delete_cookie()
     def register_user(self, location: str='main', pre_authorization: bool=True,
-                      domains: Optional[list]=None, fields: dict=None,
+                      domains: Optional[list]=None, fields: Optional[dict]=None,
                       clear_on_submit: bool=False, captcha: bool=True) -> tuple:
         """
         Creates a register new user widget.
@@ -316,7 +316,7 @@ class Authenticate:
                                                              new_name, new_email, entered_captcha,
                                                              domains)
         return None, None, None
-    def reset_password(self, username: str, location: str='main', fields: dict=None,
+    def reset_password(self, username: str, location: str='main', fields: Optional[dict]=None,
                        clear_on_submit: bool=False) -> bool:
         """
         Creates a password reset widget.
@@ -374,7 +374,7 @@ class Authenticate:
                                                           new_password_repeat):
                 return True
         return None
-    def update_user_details(self, username: str, location: str='main', fields: dict=None,
+    def update_user_details(self, username: str, location: str='main', fields: Optional[dict]=None,
                             clear_on_submit: bool=False) -> bool:
         """
         Creates a update user details widget.
