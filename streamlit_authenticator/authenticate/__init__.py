@@ -83,7 +83,7 @@ class Authenticate:
         """
         if fields is None:
             fields = {'Form name':'Forgot password', 'Username':'Username', 'Submit':'Submit',
-                      'Captcha':'Captcha}
+                      'Captcha':'Captcha'}
         if location not in ['main', 'sidebar']:
             # Temporary deprecation error to be displayed until a future release
             raise DeprecationError("""Likely deprecation error, the 'form_name' parameter has been

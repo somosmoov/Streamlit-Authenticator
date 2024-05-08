@@ -56,6 +56,7 @@ class CookieHandler:
             if (self.token is not False and 'username' in self.token and
                 self.token['exp_date'] > datetime.utcnow().timestamp()):
                 return self.token
+        return None
     def delete_cookie(self):
         """
         Deletes the re-authentication cookie.
