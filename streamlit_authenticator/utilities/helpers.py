@@ -28,12 +28,10 @@ class Helpers:
         Parameters
         ----------
         captcha_name: str
-            Name of the stored captcha in the session state.
+            Name of the generated captcha string stored in the session state.
 
         Returns
         -------
-        int
-            Randomly generated four digit captcha.
         ImageCaptcha
             Randomly generated captcha image.
         """
