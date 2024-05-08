@@ -302,10 +302,9 @@ class Authenticate:
                                                             else fields['Repeat password'],
                                                             type='password')
         if captcha:
-            captcha_image = Helpers.generate_captcha()
             entered_captcha = register_user_form.text_input('Captcha' if 'Captcha' not in fields
                                                             else fields['Captcha'])
-            register_user_form.image(captcha_image)
+            register_user_form.image(Helpers.generate_captcha())
         else:
             entered_captcha = None
         if register_user_form.form_submit_button('Register' if 'Register' not in fields
