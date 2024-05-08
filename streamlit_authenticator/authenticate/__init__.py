@@ -95,7 +95,7 @@ class Authenticate:
         forgot_password_form.subheader('Forget password' if 'Form name' not in fields
                                        else fields['Form name'])
         username = forgot_password_form.text_input('Username' if 'Username' not in fields
-                                                   else fields['Username']).lower()
+                                                   else fields['Username']).lower().strip()
 
         if forgot_password_form.form_submit_button('Submit' if 'Submit' not in fields
                                                    else fields['Submit']):
@@ -139,7 +139,7 @@ class Authenticate:
         forgot_username_form.subheader('Forget username' if 'Form name' not in fields
                                        else fields['Form name'])
         email = forgot_username_form.text_input('Email' if 'Email' not in fields
-                                                else fields['Email'])
+                                                else fields['Email']).strip()
 
         if forgot_username_form.form_submit_button('Submit' if 'Submit' not in fields
                                                    else fields['Submit']):
@@ -196,9 +196,9 @@ class Authenticate:
                     login_form = st.sidebar.form('Login')
                 login_form.subheader('Login' if 'Form name' not in fields else fields['Form name'])
                 username = login_form.text_input('Username' if 'Username' not in fields
-                                                 else fields['Username']).lower()
+                                                 else fields['Username']).lower().strip()
                 password = login_form.text_input('Password' if 'Password' not in fields
-                                                 else fields['Password'], type='password')
+                                                 else fields['Password'], type='password').strip()
                 if login_form.form_submit_button('Login' if 'Login' not in fields
                                                  else fields['Login']):
                     if self.authentication_handler.check_credentials(username,
@@ -290,20 +290,21 @@ class Authenticate:
         register_user_form.subheader('Register User' if 'Form name' not in fields
                                      else fields['Form name'])
         new_name = register_user_form.text_input('Name' if 'Name' not in fields
-                                                 else fields['Name'])
+                                                 else fields['Name']).strip()
         new_email = register_user_form.text_input('Email' if 'Email' not in fields
-                                                  else fields['Email'])
+                                                  else fields['Email']).strip()
         new_username = register_user_form.text_input('Username' if 'Username' not in fields
-                                                     else fields['Username']).lower()
+                                                     else fields['Username']).lower().strip()
         new_password = register_user_form.text_input('Password' if 'Password' not in fields
-                                                     else fields['Password'], type='password')
+                                                     else fields['Password'],
+                                                     type='password').strip()
         new_password_repeat = register_user_form.text_input('Repeat password'
                                                             if 'Repeat password' not in fields
                                                             else fields['Repeat password'],
-                                                            type='password')
+                                                            type='password').strip()
         if captcha:
             entered_captcha = register_user_form.text_input('Captcha' if 'Captcha' not in fields
-                                                            else fields['Captcha'])
+                                                            else fields['Captcha']).strip()
             register_user_form.image(Helpers.generate_captcha('register_user_captcha'))
         else:
             entered_captcha = None
@@ -356,15 +357,15 @@ class Authenticate:
         password = reset_password_form.text_input('Current password'
                                                   if 'Current password' not in fields
                                                   else fields['Current password'],
-                                                  type='password')
+                                                  type='password').strip()
         new_password = reset_password_form.text_input('New password'
                                                       if 'New password' not in fields
                                                       else fields['New password'],
-                                                      type='password')
+                                                      type='password').strip()
         new_password_repeat = reset_password_form.text_input('Repeat password'
                                                              if 'Repeat password' not in fields
                                                              else fields['Repeat password'],
-                                                             type='password')
+                                                             type='password').strip()
         if reset_password_form.form_submit_button('Reset' if 'Reset' not in fields
                                                   else fields['Reset']):
             if self.authentication_handler.reset_password(username, password, new_password,
@@ -416,7 +417,7 @@ class Authenticate:
                                                    else fields['Field'],
                                                    update_user_details_form_fields)
         new_value = update_user_details_form.text_input('New value' if 'New value' not in fields
-                                                        else fields['New value'])
+                                                        else fields['New value']).strip()
         if update_user_details_form_fields.index(field) == 0:
             field = 'name'
         elif update_user_details_form_fields.index(field) == 1:
