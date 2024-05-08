@@ -21,7 +21,7 @@ class Helpers:
     def __init__(self):
         pass
     @classmethod
-    def generate_captcha(cls, captcha_name: str) -> tuple:
+    def generate_captcha(cls, captcha_name: str) -> ImageCaptcha:
         """
         Generates a captcha image and stores the associated captcha string in the
         session state.
