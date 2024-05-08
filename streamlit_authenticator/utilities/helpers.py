@@ -21,21 +21,26 @@ class Helpers:
     def __init__(self):
         pass
     @classmethod
-    def generate_captcha(cls) -> tuple:
+    def generate_captcha(cls, captcha_name: str) -> tuple:
         """
         Generates a captcha image.
+
+        Parameters
+        ----------
+        captcha_name: str
+            Name of the stored captcha in the session state.
 
         Returns
         -------
         int
-            The randomly generated four digit captcha.
+            Randomly generated four digit captcha.
         ImageCaptcha
-            The randomly generated captcha object.
+            Randomly generated captcha image.
         """
         image = ImageCaptcha(width=120, height=75)
-        if 'generated_captcha' not in st.session_state:
-            st.session_state['generated_captcha'] = ''.join(random.choices(string.digits, k=4))
-        return image.generate(st.session_state['generated_captcha'])
+        if captcha_name not in st.session_state:
+            st.session_state[captcha_name] = ''.join(random.choices(string.digits, k=4))
+        return image.generate(st.session_state[captcha_name])
     @classmethod
     def generate_random_pw(cls, length: int=16) -> str:
         """
@@ -44,11 +49,12 @@ class Helpers:
         Parameters
         ----------
         length: int
-            The length of the returned password.
+            Length of the returned password.
+            
         Returns
         -------
         str
-            The randomly generated password.
+            Randomly generated password.
         """
         letters = string.ascii_letters + string.digits
         return ''.join(random.choice(letters) for i in range(length)).replace(' ','')
