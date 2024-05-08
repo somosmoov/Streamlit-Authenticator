@@ -28,7 +28,7 @@ class Helpers:
         Parameters
         ----------
         captcha_name: str
-            Name of the generated captcha string stored in the session state.
+            Name of the generated captcha stored in the session state.
 
         Returns
         -------
