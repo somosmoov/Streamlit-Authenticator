@@ -7,7 +7,7 @@ Libraries imported:
 - typing: Module implementing standard typing notations for Python functions.
 """
 
-from typing import Optional, List, Tuple
+from typing import Dict, List, Optional, Tuple
 import streamlit as st
 
 from utilities.hasher import Hasher
@@ -25,7 +25,7 @@ class AuthenticationHandler:
     This class will execute the logic for the login, logout, register user, reset password, 
     forgot password, forgot username, and modify user details widgets.
     """
-    def __init__(self, credentials: dict, pre_authorized: Optional[list]=None,
+    def __init__(self, credentials: dict, pre_authorized: Optional[List[str]]=None,
                  validator: Optional[Validator]=None):
         """
         Create a new instance of "AuthenticationHandler".
@@ -135,7 +135,7 @@ class AuthenticationHandler:
             Presence/absence of the value, True: value present, False value absent.
         """
         return any(value in d.values() for d in self.credentials['usernames'].values())
-    def execute_login(self, username: Optional[str]=None, token: Optional[dict]=None):
+    def execute_login(self, username: Optional[str]=None, token: Optional[Dict[str, str]]=None):
         """
         Executes login by setting authentication status to true and adding the user's
         username and name to the session state.
