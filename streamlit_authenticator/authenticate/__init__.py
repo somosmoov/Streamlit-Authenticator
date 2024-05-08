@@ -90,7 +90,8 @@ class Authenticate:
         if location == 'main':
             forgot_password_form = st.form('Forgot password', clear_on_submit=clear_on_submit)
         elif location == 'sidebar':
-            forgot_password_form = st.sidebar.form('Forgot password')
+            forgot_password_form = st.sidebar.form('Forgot password',
+                                                   clear_on_submit=clear_on_submit)
 
         forgot_password_form.subheader('Forget password' if 'Form name' not in fields
                                        else fields['Form name'])
@@ -134,7 +135,7 @@ class Authenticate:
         if location == 'main':
             forgot_username_form = st.form('Forgot username', clear_on_submit=clear_on_submit)
         elif location == 'sidebar':
-            forgot_username_form = st.sidebar.form('Forgot username')
+            forgot_username_form = st.sidebar.form('Forgot username', clear_on_submit=clear_on_submit)
 
         forgot_username_form.subheader('Forget username' if 'Form name' not in fields
                                        else fields['Form name'])
@@ -193,7 +194,7 @@ class Authenticate:
                 if location == 'main':
                     login_form = st.form('Login', clear_on_submit=clear_on_submit)
                 elif location == 'sidebar':
-                    login_form = st.sidebar.form('Login')
+                    login_form = st.sidebar.form('Login', clear_on_submit=clear_on_submit)
                 login_form.subheader('Login' if 'Form name' not in fields else fields['Form name'])
                 username = login_form.text_input('Username' if 'Username' not in fields
                                                  else fields['Username']).lower().strip()
@@ -285,7 +286,7 @@ class Authenticate:
         if location == 'main':
             register_user_form = st.form('Register user', clear_on_submit=clear_on_submit)
         elif location == 'sidebar':
-            register_user_form = st.sidebar.form('Register user')
+            register_user_form = st.sidebar.form('Register user', clear_on_submit=clear_on_submit)
 
         register_user_form.subheader('Register User' if 'Form name' not in fields
                                      else fields['Form name'])
@@ -350,7 +351,8 @@ class Authenticate:
         if location == 'main':
             reset_password_form = st.form('Reset password', clear_on_submit=clear_on_submit)
         elif location == 'sidebar':
-            reset_password_form = st.sidebar.form('Reset password')
+            reset_password_form = st.sidebar.form('Reset password',
+                                                  clear_on_submit=clear_on_submit)
         reset_password_form.subheader('Reset password' if 'Form name' not in fields
                                       else fields['Form name'])
         username = username.lower()
@@ -407,7 +409,8 @@ class Authenticate:
             update_user_details_form = st.form('Update user details',
                                                clear_on_submit=clear_on_submit)
         elif location == 'sidebar':
-            update_user_details_form = st.sidebar.form('Update user details')
+            update_user_details_form = st.sidebar.form('Update user details',
+                                                       clear_on_submit=clear_on_submit)
         update_user_details_form.subheader('Update user details' if 'Form name' not in fields
                                            else fields['Form name'])
         username = username.lower()
