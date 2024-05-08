@@ -319,7 +319,7 @@ class AuthenticationHandler:
         if new_password != new_password_repeat:
             raise RegisterError('Passwords do not match')
         if entered_captcha or entered_captcha == '':
-            if entered_captcha != st.session_state['generated_captcha']:
+            if entered_captcha != st.session_state['register_user_captcha']:
                 raise RegisterError('Captcha entered incorrectly')
             del st.session_state['generated_captcha']
         if pre_authorization:
