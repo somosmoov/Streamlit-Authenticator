@@ -56,7 +56,7 @@ class Authenticate:
                                                           cookie_expiry_days)
 
     def forgot_password(self, location: str='main', fields: Optional[Dict[str, str]]=None,
-                        clear_on_submit: bool=False) -> tuple:
+                        captcha: bool=False, clear_on_submit: bool=False) -> tuple:
         """
         Creates a forgot password widget.
 
@@ -66,6 +66,9 @@ class Authenticate:
             Location of the forgot password widget i.e. main or sidebar.
         fields: dict
             Rendered names of the fields/buttons.
+        captcha: bool
+            Captcha requirement for the forgot password widget, True: captcha required,
+            False: captcha removed.
         clear_on_submit: bool
             Clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
 
@@ -79,7 +82,8 @@ class Authenticate:
             New plain text password that should be transferred to the user securely.
         """
         if fields is None:
-            fields = {'Form name':'Forgot password', 'Username':'Username', 'Submit':'Submit'}
+            fields = {'Form name':'Forgot password', 'Username':'Username', 'Submit':'Submit',
+                      'Captcha':'Captcha}
         if location not in ['main', 'sidebar']:
             # Temporary deprecation error to be displayed until a future release
             raise DeprecationError("""Likely deprecation error, the 'form_name' parameter has been
@@ -97,13 +101,17 @@ class Authenticate:
                                        else fields['Form name'])
         username = forgot_password_form.text_input('Username' if 'Username' not in fields
                                                    else fields['Username']).lower().strip()
-
+        entered_captcha = None
+        if captcha:
+            entered_captcha = forgot_password_form.text_input('Captcha' if 'Captcha' not in fields
+                                                            else fields['Captcha']).strip()
+            forgot_password_form.image(Helpers.generate_captcha('forgot_password_captcha'))
         if forgot_password_form.form_submit_button('Submit' if 'Submit' not in fields
                                                    else fields['Submit']):
-            return self.authentication_handler.forgot_password(username)
+            return self.authentication_handler.forgot_password(username, entered_captcha)
         return None, None, None
     def forgot_username(self, location: str='main', fields: Optional[Dict[str, str]]=None,
-                        clear_on_submit: bool=False) -> tuple:
+                        captcha: bool=False, clear_on_submit: bool=False) -> tuple:
         """
         Creates a forgot username widget.
 
@@ -113,6 +121,9 @@ class Authenticate:
             Location of the forgot username widget i.e. main or sidebar.
         fields: dict
             Rendered names of the fields/buttons.
+        captcha: bool
+            Captcha requirement for the forgot username widget, True: captcha required,
+            False: captcha removed.
         clear_on_submit: bool
             Clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
 
@@ -124,7 +135,8 @@ class Authenticate:
             Email associated with the forgotten username.
         """
         if fields is None:
-            fields = {'Form name':'Forgot username', 'Email':'Email', 'Submit':'Submit'}
+            fields = {'Form name':'Forgot username', 'Email':'Email', 'Submit':'Submit',
+                     'Captcha':'Captcha'}
         if location not in ['main', 'sidebar']:
             # Temporary deprecation error to be displayed until a future release
             raise DeprecationError("""Likely deprecation error, the 'form_name' parameter
@@ -141,14 +153,18 @@ class Authenticate:
                                        else fields['Form name'])
         email = forgot_username_form.text_input('Email' if 'Email' not in fields
                                                 else fields['Email']).strip()
-
+        entered_captcha = None
+        if captcha:
+            entered_captcha = forgot_username_form.text_input('Captcha' if 'Captcha' not in fields
+                                                            else fields['Captcha']).strip()
+            forgot_username_form.image(Helpers.generate_captcha('forgot_username_captcha'))
         if forgot_username_form.form_submit_button('Submit' if 'Submit' not in fields
                                                    else fields['Submit']):
-            return self.authentication_handler.forgot_username(email)
+            return self.authentication_handler.forgot_username(email, entered_captcha)
         return None, email
     def login(self, location: str='main', max_concurrent_users: Optional[int]=None,
               max_login_attempts: Optional[int]=None, fields: Optional[Dict[str, str]]=None,
-              clear_on_submit: bool=False) -> tuple:
+              captcha: bool=False, clear_on_submit: bool=False) -> tuple:
         """
         Creates a login widget.
 
@@ -162,6 +178,9 @@ class Authenticate:
             Maximum number of failed login attempts a user can make.
         fields: dict
             Rendered names of the fields/buttons.
+        captcha: bool
+            Captcha requirement for the login widget, True: captcha required,
+            False: captcha removed.
         clear_on_submit: bool
             Clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
 
@@ -177,7 +196,7 @@ class Authenticate:
         """
         if fields is None:
             fields = {'Form name':'Login', 'Username':'Username', 'Password':'Password',
-                      'Login':'Login'}
+                      'Login':'Login', 'Captcha':'Captcha'}
         if location not in ['main', 'sidebar']:
             # Temporary deprecation error to be displayed until a future release
             raise DeprecationError("""Likely deprecation error, the 'form_name' parameter has been
@@ -200,12 +219,18 @@ class Authenticate:
                                                  else fields['Username']).lower().strip()
                 password = login_form.text_input('Password' if 'Password' not in fields
                                                  else fields['Password'], type='password').strip()
+                entered_captcha = None
+                if captcha:
+                    entered_captcha = login_form.text_input('Captcha' if 'Captcha' not in fields
+                                                                    else fields['Captcha']).strip()
+                    login_form.image(Helpers.generate_captcha('login_captcha'))
                 if login_form.form_submit_button('Login' if 'Login' not in fields
                                                  else fields['Login']):
                     if self.authentication_handler.check_credentials(username,
                                                                      password,
                                                                      max_concurrent_users,
-                                                                     max_login_attempts):
+                                                                     max_login_attempts,
+                                                                     entered_captcha):
                         self.authentication_handler.execute_login(username=username)
                         self.cookie_handler.set_cookie()
         return (st.session_state['name'], st.session_state['authentication_status'],
@@ -239,7 +264,7 @@ class Authenticate:
                 self.cookie_handler.delete_cookie()
     def register_user(self, location: str='main', pre_authorization: bool=True,
                       domains: Optional[List[str]]=None, fields: Optional[Dict[str, str]]=None,
-                      clear_on_submit: bool=False, captcha: bool=True) -> tuple:
+                      captcha: bool=True, clear_on_submit: bool=False) -> tuple:
         """
         Creates a register new user widget.
 
@@ -255,10 +280,11 @@ class Authenticate:
             list: required list of domains, None: any domain is allowed.
         fields: dict
             Rendered names of the fields/buttons.
+        captcha: bool
+            Captcha requirement for the register user widget, True: captcha required,
+            False: captcha removed.
         clear_on_submit: bool
             Clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
-        captcha: bool
-            Captcha requirement for registration, True: captcha required, False: captcha removed.
 
         Returns
         -------
@@ -303,12 +329,11 @@ class Authenticate:
                                                             if 'Repeat password' not in fields
                                                             else fields['Repeat password'],
                                                             type='password').strip()
+        entered_captcha = None
         if captcha:
             entered_captcha = register_user_form.text_input('Captcha' if 'Captcha' not in fields
                                                             else fields['Captcha']).strip()
             register_user_form.image(Helpers.generate_captcha('register_user_captcha'))
-        else:
-            entered_captcha = None
         if register_user_form.form_submit_button('Register' if 'Register' not in fields
                                                  else fields['Register']):
             return self.authentication_handler.register_user(new_password, new_password_repeat,
