@@ -218,6 +218,8 @@ except Exception as e:
 >    - Customizes the text of headers, buttons and other fields.
 >  - **clear_on_submit:** _bool, default False_
 >    - Specifies the clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
+>  - **captcha:** _bool, default True_
+>    - Specifies the captcha requirement for registration, True: captcha required, False: captcha removed.
 > #### Returns:
 > - _str_
 >   - Email associated with the new user.
