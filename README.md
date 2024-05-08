@@ -116,6 +116,8 @@ authenticator.login()
 >    - Limits the number of failed login attempts. If not specified there will be no limit to the number of failed login attempts.
 >  - **fields:** _dict, default {'Form name':'Login', 'Username':'Username', 'Password':'Password', 'Login':'Login'}_
 >    - Customizes the text of headers, buttons and other fields.
+>  - **captcha:** _bool, default False_
+>    - Specifies the captcha requirement for the login widget, True: captcha required, False: captcha removed.
 >  - **clear_on_submit:** _bool, default False_
 >    - Specifies the clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
 > #### Returns:
@@ -216,10 +218,10 @@ except Exception as e:
 >    - Specifies the required list of domains a new email must belong to i.e. ['gmail.com', 'yahoo.com'], list: the required list of domains, None: any domain is allowed.
 >  - **fields:** _dict, default {'Form name':'Register user', 'Email':'Email', 'Username':'Username', 'Password':'Password', 'Repeat password':'Repeat password', 'Register':'Register'}_
 >    - Customizes the text of headers, buttons and other fields.
+>  - **captcha:** _bool, default True_
+>    - Specifies the captcha requirement for the register user widget, True: captcha required, False: captcha removed.
 >  - **clear_on_submit:** _bool, default False_
 >    - Specifies the clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
->  - **captcha:** _bool, default True_
->    - Specifies the captcha requirement for registration, True: captcha required, False: captcha removed.
 > #### Returns:
 > - _str_
 >   - Email associated with the new user.
@@ -254,6 +256,8 @@ except Exception as e:
 >    - Specifies the location of the forgot password widget.
 >  - **fields:** _dict, default {'Form name':'Forgot password', 'Username':'Username', 'Submit':'Submit'}_
 >    - Customizes the text of headers, buttons and other fields.
+>  - **captcha:** _bool, default False_
+>    - Specifies the captcha requirement for the forgot password widget, True: captcha required, False: captcha removed.
 >  - **clear_on_submit:** _bool, default False_
 >    - Specifies the clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
 > #### Returns:
@@ -290,6 +294,8 @@ except Exception as e:
 >    - Specifies the location of the forgot username widget.
 >  - **fields:** _dict, default {'Form name':'Forgot username', 'Email':'Email', 'Submit':'Submit'}_
 >    - Customizes the text of headers, buttons and other fields.
+>  - **captcha:** _bool, default False_
+>    - Specifies the captcha requirement for the forgot username widget, True: captcha required, False: captcha removed.
 >  - **clear_on_submit:** _bool, default False_
 >    - Specifies the clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
 > #### Returns:
