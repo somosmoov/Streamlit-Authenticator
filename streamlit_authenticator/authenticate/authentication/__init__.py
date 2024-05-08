@@ -7,7 +7,7 @@ Libraries imported:
 - typing: Module implementing standard typing notations for Python functions.
 """
 
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 import streamlit as st
 
 from utilities.hasher import Hasher
