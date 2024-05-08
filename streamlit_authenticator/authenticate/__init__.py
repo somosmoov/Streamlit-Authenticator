@@ -304,7 +304,7 @@ class Authenticate:
         if captcha:
             entered_captcha = register_user_form.text_input('Captcha' if 'Captcha' not in fields
                                                             else fields['Captcha'])
-            register_user_form.image(Helpers.generate_captcha())
+            register_user_form.image(Helpers.generate_captcha('register_user_captcha'))
         else:
             entered_captcha = None
         if register_user_form.form_submit_button('Register' if 'Register' not in fields
