@@ -46,7 +46,7 @@ class CookieHandler:
         Returns
         -------
         str
-            re-authentication cookie.
+            Re-authentication cookie.
         """
         if st.session_state['logout']:
             return False
