@@ -56,7 +56,7 @@ class Authenticate:
                                                           cookie_expiry_days)
     def forgot_password(self, location: str='main', fields: Optional[Dict[str, str]]=None,
                         captcha: bool=False, clear_on_submit: bool=False,
-                        key: Optional[str]=None) -> tuple:
+                        key: str='Forgot password') -> tuple:
         """
         Creates a forgot password widget.
 
@@ -94,22 +94,17 @@ class Authenticate:
                                    https://github.com/mkhorasani/Streamlit-Authenticator/tree/main?tab=readme-ov-file#authenticateforgot_password""")
             # raise ValueError("Location must be one of 'main' or 'sidebar'")
         if location == 'main':
-            forgot_password_form = st.form('Forgot password', clear_on_submit=clear_on_submit,
-                                          key=key)
+            forgot_password_form = st.form(key=key, clear_on_submit=clear_on_submit)
         elif location == 'sidebar':
-            forgot_password_form = st.sidebar.form('Forgot password',
-                                                   clear_on_submit=clear_on_submit, key=key)
-
+            forgot_password_form = st.sidebar.form(key=key, clear_on_submit=clear_on_submit)
         forgot_password_form.subheader('Forget password' if 'Form name' not in fields
-                                       else fields['Form name'], key=key)
+                                       else fields['Form name'])
         username = forgot_password_form.text_input('Username' if 'Username' not in fields
-                                                   else fields['Username'],
-                                                   key=key).lower().strip()
+                                                   else fields['Username']).lower().strip()
         entered_captcha = None
         if captcha:
             entered_captcha = forgot_password_form.text_input('Captcha' if 'Captcha' not in fields
-                                                              else fields['Captcha'],
-                                                              key=key).strip()
+                                                              else fields['Captcha']).strip()
             forgot_password_form.image(Helpers.generate_captcha('forgot_password_captcha'))
         if forgot_password_form.form_submit_button('Submit' if 'Submit' not in fields
                                                    else fields['Submit']):
@@ -117,7 +112,7 @@ class Authenticate:
         return None, None, None
     def forgot_username(self, location: str='main', fields: Optional[Dict[str, str]]=None,
                         captcha: bool=False, clear_on_submit: bool=False,
-                        key: Optional[str]=None) -> tuple:
+                        key: str='Forgot username') -> tuple:
         """
         Creates a forgot username widget.
 
@@ -153,20 +148,17 @@ class Authenticate:
                                    https://github.com/mkhorasani/Streamlit-Authenticator/tree/main?tab=readme-ov-file#authenticateforgot_username""")
             # raise ValueError("Location must be one of 'main' or 'sidebar'")
         if location == 'main':
-            forgot_username_form = st.form('Forgot username', clear_on_submit=clear_on_submit,
-                                           key=key)
+            forgot_username_form = st.form(key=key, clear_on_submit=clear_on_submit)
         elif location == 'sidebar':
-            forgot_username_form = st.sidebar.form('Forgot username', clear_on_submit=clear_on_submit,
-                                                   key=key)
+            forgot_username_form = st.sidebar.form(key=key, clear_on_submit=clear_on_submit)
         forgot_username_form.subheader('Forget username' if 'Form name' not in fields
-                                       else fields['Form name'], key=key)
+                                       else fields['Form name'])
         email = forgot_username_form.text_input('Email' if 'Email' not in fields
-                                                else fields['Email'], key=key).strip()
+                                                else fields['Email']).strip()
         entered_captcha = None
         if captcha:
             entered_captcha = forgot_username_form.text_input('Captcha' if 'Captcha' not in fields
-                                                              else fields['Captcha'],
-                                                              key=key).strip()
+                                                              else fields['Captcha']).strip()
             forgot_username_form.image(Helpers.generate_captcha('forgot_username_captcha'))
         if forgot_username_form.form_submit_button('Submit' if 'Submit' not in fields
                                                    else fields['Submit']):
@@ -174,7 +166,7 @@ class Authenticate:
         return None, email
     def login(self, location: str='main', max_concurrent_users: Optional[int]=None,
               max_login_attempts: Optional[int]=None, fields: Optional[Dict[str, str]]=None,
-              captcha: bool=False, clear_on_submit: bool=False, key: Optional[str]=None) -> tuple:
+              captcha: bool=False, clear_on_submit: bool=False, key: str='Login') -> tuple:
         """
         Creates a login widget.
 
@@ -220,27 +212,24 @@ class Authenticate:
             token = self.cookie_handler.get_cookie()
             if token:
                 self.authentication_handler.execute_login(token=token)
-                time.sleep(0.7)
+            time.sleep(0.7)
             if not st.session_state['authentication_status']:
                 if location == 'main':
-                    login_form = st.form('Login', clear_on_submit=clear_on_submit, key=key)
+                    login_form = st.form(key=key, clear_on_submit=clear_on_submit)
                 elif location == 'sidebar':
-                    login_form = st.sidebar.form('Login', clear_on_submit=clear_on_submit, key=key)
+                    login_form = st.sidebar.form(key=key, clear_on_submit=clear_on_submit)
                 elif location == 'unrendered':
                     return (st.session_state['name'], st.session_state['authentication_status'],
                         st.session_state['username'])
-                login_form.subheader('Login' if 'Form name' not in fields else fields['Form name'],
-                                     key=key)
+                login_form.subheader('Login' if 'Form name' not in fields else fields['Form name'])
                 username = login_form.text_input('Username' if 'Username' not in fields
-                                                 else fields['Username'], key=key).lower().strip()
+                                                 else fields['Username']).lower().strip()
                 password = login_form.text_input('Password' if 'Password' not in fields
-                                                 else fields['Password'], type='password',
-                                                 key=key).strip()
+                                                 else fields['Password'], type='password').strip()
                 entered_captcha = None
                 if captcha:
                     entered_captcha = login_form.text_input('Captcha' if 'Captcha' not in fields
-                                                            else fields['Captcha'],
-                                                            key=key).strip()
+                                                            else fields['Captcha']).strip()
                     login_form.image(Helpers.generate_captcha('login_captcha'))
                 if login_form.form_submit_button('Login' if 'Login' not in fields
                                                  else fields['Login']):
@@ -283,7 +272,7 @@ class Authenticate:
     def register_user(self, location: str='main', pre_authorization: bool=True,
                       domains: Optional[List[str]]=None, fields: Optional[Dict[str, str]]=None,
                       captcha: bool=True, clear_on_submit: bool=False,
-                      key: Optional[str]=None) -> tuple:
+                      key: str='Register user') -> tuple:
         """
         Creates a register new user widget.
 
@@ -331,32 +320,28 @@ class Authenticate:
                                    https://github.com/mkhorasani/Streamlit-Authenticator/tree/main?tab=readme-ov-file#authenticateregister_user""")
             # raise ValueError("Location must be one of 'main' or 'sidebar'")
         if location == 'main':
-            register_user_form = st.form('Register user', clear_on_submit=clear_on_submit,
-                                         key=key)
+            register_user_form = st.form(key=key, clear_on_submit=clear_on_submit)
         elif location == 'sidebar':
-            register_user_form = st.sidebar.form('Register user', clear_on_submit=clear_on_submit,
-                                                 key=key)
-        register_user_form.subheader('Register User' if 'Form name' not in fields
-                                     else fields['Form name'], key=key)
+            register_user_form = st.sidebar.form(key=key, clear_on_submit=clear_on_submit)
+        register_user_form.subheader('Register user' if 'Form name' not in fields
+                                     else fields['Form name'])
         new_name = register_user_form.text_input('Name' if 'Name' not in fields
-                                                 else fields['Name'], key=key).strip()
+                                                 else fields['Name']).strip()
         new_email = register_user_form.text_input('Email' if 'Email' not in fields
-                                                  else fields['Email'], key=key).strip()
+                                                  else fields['Email']).strip()
         new_username = register_user_form.text_input('Username' if 'Username' not in fields
-                                                     else fields['Username'],
-                                                     key=key).lower().strip()
+                                                     else fields['Username']).lower().strip()
         new_password = register_user_form.text_input('Password' if 'Password' not in fields
                                                      else fields['Password'],
-                                                     type='password', key=key).strip()
+                                                     type='password').strip()
         new_password_repeat = register_user_form.text_input('Repeat password'
                                                             if 'Repeat password' not in fields
                                                             else fields['Repeat password'],
-                                                            type='password', key=key).strip()
+                                                            type='password').strip()
         entered_captcha = None
         if captcha:
             entered_captcha = register_user_form.text_input('Captcha' if 'Captcha' not in fields
-                                                            else fields['Captcha'],
-                                                            key=key).strip()
+                                                            else fields['Captcha']).strip()
             register_user_form.image(Helpers.generate_captcha('register_user_captcha'))
         if register_user_form.form_submit_button('Register' if 'Register' not in fields
                                                  else fields['Register']):
@@ -367,7 +352,7 @@ class Authenticate:
         return None, None, None
     def reset_password(self, username: str, location: str='main',
                        fields: Optional[Dict[str, str]]=None, clear_on_submit: bool=False,
-                       key: Optional[str]=None) -> bool:
+                       key: str='Reset password') -> bool:
         """
         Creates a password reset widget.
 
@@ -401,26 +386,24 @@ class Authenticate:
                                    https://github.com/mkhorasani/Streamlit-Authenticator/tree/main?tab=readme-ov-file#authenticatereset_password""")
             # raise ValueError("Location must be one of 'main' or 'sidebar'")
         if location == 'main':
-            reset_password_form = st.form('Reset password', clear_on_submit=clear_on_submit,
-                                          key=key)
+            reset_password_form = st.form(key=key, clear_on_submit=clear_on_submit)
         elif location == 'sidebar':
-            reset_password_form = st.sidebar.form('Reset password',
-                                                  clear_on_submit=clear_on_submit, key=key)
+            reset_password_form = st.sidebar.form(key=key, clear_on_submit=clear_on_submit)
         reset_password_form.subheader('Reset password' if 'Form name' not in fields
-                                      else fields['Form name'], key=key)
+                                      else fields['Form name'])
         username = username.lower()
         password = reset_password_form.text_input('Current password'
                                                   if 'Current password' not in fields
                                                   else fields['Current password'],
-                                                  type='password', key=key).strip()
+                                                  type='password').strip()
         new_password = reset_password_form.text_input('New password'
                                                       if 'New password' not in fields
                                                       else fields['New password'],
-                                                      type='password', key=key).strip()
+                                                      type='password').strip()
         new_password_repeat = reset_password_form.text_input('Repeat password'
                                                              if 'Repeat password' not in fields
                                                              else fields['Repeat password'],
-                                                             type='password', key=key).strip()
+                                                             type='password').strip()
         if reset_password_form.form_submit_button('Reset' if 'Reset' not in fields
                                                   else fields['Reset']):
             if self.authentication_handler.reset_password(username, password, new_password,
@@ -429,7 +412,7 @@ class Authenticate:
         return None
     def update_user_details(self, username: str, location: str='main',
                             fields: Optional[Dict[str, str]]=None,
-                            clear_on_submit: bool=False, key: Optional[str]=None) -> bool:
+                            clear_on_submit: bool=False, key: str='Update user details') -> bool:
         """
         Creates a update user details widget.
 
@@ -462,22 +445,19 @@ class Authenticate:
                                    https://github.com/mkhorasani/Streamlit-Authenticator/tree/main?tab=readme-ov-file#authenticateupdate_user_details""")
             # raise ValueError("Location must be one of 'main' or 'sidebar'")
         if location == 'main':
-            update_user_details_form = st.form('Update user details',
-                                               clear_on_submit=clear_on_submit, key=key)
+            update_user_details_form = st.form(key=key, clear_on_submit=clear_on_submit)
         elif location == 'sidebar':
-            update_user_details_form = st.sidebar.form('Update user details',
-                                                       clear_on_submit=clear_on_submit, key=key)
+            update_user_details_form = st.sidebar.form(key=key, clear_on_submit=clear_on_submit)
         update_user_details_form.subheader('Update user details' if 'Form name' not in fields
-                                           else fields['Form name'], key=key)
+                                           else fields['Form name'])
         username = username.lower()
         update_user_details_form_fields = ['Name' if 'Name' not in fields else fields['Name'],
                                            'Email' if 'Email' not in fields else fields['Email']]
         field = update_user_details_form.selectbox('Field' if 'Field' not in fields
                                                    else fields['Field'],
-                                                   update_user_details_form_fields, key=key)
+                                                   update_user_details_form_fields)
         new_value = update_user_details_form.text_input('New value' if 'New value' not in fields
-                                                        else fields['New value'],
-                                                        key=key).strip()
+                                                        else fields['New value']).strip()
         if update_user_details_form_fields.index(field) == 0:
             field = 'name'
         elif update_user_details_form_fields.index(field) == 1:
