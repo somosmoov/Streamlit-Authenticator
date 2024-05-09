@@ -94,7 +94,7 @@ authenticator = stauth.Authenticate(
 >    - Specifies the key that will be used to hash the signature of the re-authentication cookie.
 >  - **cookie_expiry_days:** _float, default 30.0_
 >    - Specifies the number of days before the re-authentication cookie automatically expires on the client's browser.
->  - **pre-authorized:** _list, default None_
+>  - **pre_authorized:** _list, default None_
 >    - Provides the list of emails of unregistered users who are authorized to register.
 >  - **validator:** _object, default None_
 >    - Provides a validator object that will check the validity of the username, name, and email fields.
@@ -197,7 +197,7 @@ _Please remember to update the config file (as shown in step 9) after you use th
 
 ### 5. Creating a new user registration widget
 
-* You may use the **register_user** widget to allow a user to sign up to your application as shown below. If you require the user to be pre-authorized, set the **pre-authorization** argument to True and add their email to the **pre-authorized** list in the configuration file. Once they have registered, their email will be automatically removed from the **pre-authorized** list in the configuration file. Alternatively, to allow anyone to sign up, set the **pre-authorization** argument to False.
+* You may use the **register_user** widget to allow a user to sign up to your application as shown below. If you require the user to be pre-authorized, set the **pre_authorization** argument to True and add their email to the **pre_authorized** list in the configuration file. Once they have registered, their email will be automatically removed from the **pre_authorized** list in the configuration file. Alternatively, to allow anyone to sign up, set the **pre_authorization** argument to False.
 
 ```python
 try:
@@ -212,7 +212,7 @@ except Exception as e:
 > #### Parameters:
 >  - **location:** _str, {'main', 'sidebar'}, default 'main'_
 >    - Specifies the location of the register user widget.
->  - **pre-authorization:** _bool, default True_
+>  - **pre_authorization:** _bool, default True_
 >    - Specifies the pre-authorization requirement, True: user must be pre-authorized to register, False: any user can register.
 >  - **domains:** _list, default None_
 >    - Specifies the required list of domains a new email must belong to i.e. ['gmail.com', 'yahoo.com'], list: the required list of domains, None: any domain is allowed.
