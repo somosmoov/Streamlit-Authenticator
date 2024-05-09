@@ -54,7 +54,6 @@ class Authenticate:
         self.cookie_handler             =   CookieHandler(cookie_name,
                                                           cookie_key,
                                                           cookie_expiry_days)
-
     def forgot_password(self, location: str='main', fields: Optional[Dict[str, str]]=None,
                         captcha: bool=False, clear_on_submit: bool=False,
                         key: Optional[str]=None) -> tuple:
