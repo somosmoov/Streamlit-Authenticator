@@ -62,6 +62,21 @@ class AuthenticationHandler:
             st.session_state['username'] = None
         if 'logout' not in st.session_state:
             st.session_state['logout'] = None
+    def _check_captcha(self, captcha_name: str, entered_captcha: Optional[str]=None):
+        """
+        Checks the validity of the entered captcha.
+
+        Parameters
+        ----------
+        captcha_name: str
+            Name of the generated captcha stored in the session state.
+        entered_captcha: str
+            User entered captcha to validate against the generated captcha.
+        """
+        if entered_captcha or entered_captcha == '':
+            if entered_captcha != st.session_state[captcha_name]:
+                raise RegisterError('Captcha entered incorrectly')
+            del st.session_state[captcha_name]
     def check_credentials(self, username: str, password: str,
                           max_concurrent_users: Optional[int]=None,
                           max_login_attempts: Optional[int]=None,
@@ -87,10 +102,7 @@ class AuthenticationHandler:
         bool
             Validity of the entered credentials.
         """
-        if entered_captcha or entered_captcha == '':
-            if entered_captcha != st.session_state['login_captcha']:
-                raise LoginError('Captcha entered incorrectly')
-            del st.session_state['login_captcha']
+        self._check_captcha('login_captcha', entered_captcha)
         if isinstance(max_concurrent_users, int):
             if self._count_concurrent_users() > max_concurrent_users - 1:
                 raise LoginError('Maximum number of concurrent users exceeded')
@@ -190,10 +202,7 @@ class AuthenticationHandler:
         tuple
             Username of the user; email of the user; new random password of the user.
         """
-        if entered_captcha or entered_captcha == '':
-            if entered_captcha != st.session_state['forgot_password_captcha']:
-                raise ForgotError('Captcha entered incorrectly')
-            del st.session_state['forgot_password_captcha']
+        self._check_captcha('forgot_password_captcha', entered_captcha)
         if not self.validator.validate_length(username, 1):
             raise ForgotError('Username not provided')
         if username in self.credentials['usernames']:
@@ -217,10 +226,7 @@ class AuthenticationHandler:
         tuple
             Username of the user; email of the user.
         """
-        if entered_captcha or entered_captcha == '':
-            if entered_captcha != st.session_state['forgot_username_captcha']:
-                raise ForgotError('Captcha entered incorrectly')
-            del st.session_state['forgot_username_captcha']
+        self._check_captcha('forgot_username_captcha', entered_captcha)
         if not self.validator.validate_length(email, 1):
             raise ForgotError('Email not provided')
         return self._get_username('email', email), email
@@ -333,10 +339,7 @@ class AuthenticationHandler:
         tuple
             Email of the new user; username of the new user; name of the new user.
         """
-        if entered_captcha or entered_captcha == '':
-            if entered_captcha != st.session_state['register_user_captcha']:
-                raise RegisterError('Captcha entered incorrectly')
-            del st.session_state['register_user_captcha']
+        self._check_captcha('register_user_captcha', entered_captcha)
         if not self.validator.validate_length(new_password, 1) \
             or not self.validator.validate_length(new_password_repeat, 1):
             raise RegisterError('Password/repeat password fields cannot be empty')
