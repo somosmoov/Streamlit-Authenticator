@@ -181,7 +181,7 @@ class Authenticate:
         Parameters
         ----------
         location: str
-            Location of the login widget i.e. main or sidebar.
+            Location of the logout button i.e. main, sidebar or unrendered.
         max_concurrent_users: int
             Maximum number of users allowed to login concurrently.
         max_login_attempts: int
@@ -209,23 +209,26 @@ class Authenticate:
         if fields is None:
             fields = {'Form name':'Login', 'Username':'Username', 'Password':'Password',
                       'Login':'Login', 'Captcha':'Captcha'}
-        if location not in ['main', 'sidebar']:
+        if location not in ['main', 'sidebar', 'unrendered']:
             # Temporary deprecation error to be displayed until a future release
             raise DeprecationError("""Likely deprecation error, the 'form_name' parameter has been
                                    replaced with the 'fields' parameter. For further information please 
                                    refer to 
                                    https://github.com/mkhorasani/Streamlit-Authenticator/tree/main?tab=readme-ov-file#authenticatelogin""")
-            # raise ValueError("Location must be one of 'main' or 'sidebar'")
+            # raise ValueError("Location must be one of 'main' or 'sidebar' or 'unrendered'")
         if not st.session_state['authentication_status']:
             token = self.cookie_handler.get_cookie()
             if token:
                 self.authentication_handler.execute_login(token=token)
-            time.sleep(0.7)
+                time.sleep(0.7)
             if not st.session_state['authentication_status']:
                 if location == 'main':
                     login_form = st.form('Login', clear_on_submit=clear_on_submit, key=key)
                 elif location == 'sidebar':
                     login_form = st.sidebar.form('Login', clear_on_submit=clear_on_submit, key=key)
+                elif location == 'unrendered':
+                    return (st.session_state['name'], st.session_state['authentication_status'],
+                        st.session_state['username'])
                 login_form.subheader('Login' if 'Form name' not in fields else fields['Form name'],
                                      key=key)
                 username = login_form.text_input('Username' if 'Username' not in fields
