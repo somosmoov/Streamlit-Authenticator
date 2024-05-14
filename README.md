@@ -100,7 +100,7 @@ authenticator = stauth.Authenticate(
 >    - Provides a validator object that will check the validity of the username, name, and email fields.
 
 * Then render the login module as follows.
-* **_Please remember to re-invoke the login function on each and every page in a multi-page application._**
+* **_Please remember to re-invoke an 'unrendered' login widget on each and every page in a multi-page application._**
 
 ```python
 authenticator.login()
@@ -199,7 +199,7 @@ if st.session_state["authentication_status"]:
 
 ![](https://github.com/mkhorasani/Streamlit-Authenticator/blob/main/graphics/reset_password.JPG)
 
-_Please remember to update the config file (as shown in step 9) after you use this widget._
+**_Please remember to update the config file (as shown in step 9) after you use this widget._**
 
 ### 5. Creating a new user registration widget
 
@@ -240,7 +240,7 @@ except Exception as e:
 
 ![](https://github.com/mkhorasani/Streamlit-Authenticator/blob/main/graphics/register_user.JPG)
 
-_Please remember to update the config file (as shown in step 9) after you use this widget._
+**_Please remember to update the config file (as shown in step 9) after you use this widget._**
 
 ### 6. Creating a forgot password widget
 
@@ -280,7 +280,7 @@ except Exception as e:
 
 ![](https://github.com/mkhorasani/Streamlit-Authenticator/blob/main/graphics/forgot_password.JPG)
 
-_Please remember to update the config file (as shown in step 9) after you use this widget._
+**_Please remember to update the config file (as shown in step 9) after you use this widget._**
 
 ### 7. Creating a forgot username widget
 
@@ -349,7 +349,7 @@ if st.session_state["authentication_status"]:
 
 ![](https://github.com/mkhorasani/Streamlit-Authenticator/blob/main/graphics/update_user_details.JPG)
 
-_Please remember to update the config file (as shown in step 9) after you use this widget._
+**_Please remember to update the config file (as shown in step 9) after you use this widget._**
 
 ### 9. Updating the configuration file
 
