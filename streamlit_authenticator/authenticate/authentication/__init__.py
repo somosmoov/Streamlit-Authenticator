@@ -39,21 +39,22 @@ class AuthenticationHandler:
         validator: Validator
             Validator object that checks the validity of the username, name, and email fields.
         """
-        self.credentials                =   credentials
-        self.pre_authorized             =   pre_authorized
-        self.credentials['usernames']   =   {
+        self.credentials = credentials
+        if self.credentials['usernames']:
+            self.credentials['usernames'] = {
                                             key.lower(): value
                                             for key, value in credentials['usernames'].items()
                                             }
-        self.validator                  =   validator if validator is not None else Validator()
-        for username, _ in self.credentials['usernames'].items():
-            if 'logged_in' not in self.credentials['usernames'][username]:
-                self.credentials['usernames'][username]['logged_in'] = False
-            if 'failed_login_attempts' not in self.credentials['usernames'][username]:
-                self.credentials['usernames'][username]['failed_login_attempts'] = 0
-            if not Hasher._is_hash(self.credentials['usernames'][username]['password']):
-                self.credentials['usernames'][username]['password'] = \
-                    Hasher._hash(self.credentials['usernames'][username]['password'])
+            for username, _ in self.credentials['usernames'].items():
+                if 'logged_in' not in self.credentials['usernames'][username]:
+                    self.credentials['usernames'][username]['logged_in'] = False
+                if 'failed_login_attempts' not in self.credentials['usernames'][username]:
+                    self.credentials['usernames'][username]['failed_login_attempts'] = 0
+                if not Hasher._is_hash(self.credentials['usernames'][username]['password']):
+                    self.credentials['usernames'][username]['password'] = \
+                        Hasher._hash(self.credentials['usernames'][username]['password'])
+        self.pre_authorized = pre_authorized
+        self.validator = validator if validator is not None else Validator()
         if 'name' not in st.session_state:
             st.session_state['name'] = None
         if 'authentication_status' not in st.session_state:
