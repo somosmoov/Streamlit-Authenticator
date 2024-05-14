@@ -265,8 +265,7 @@ class AuthenticationHandler:
             self.credentials['usernames'][username]['failed_login_attempts'] = 0
         else:
             self.credentials['usernames'][username]['failed_login_attempts'] += 1
-    def _register_credentials(self, username: str, name: str, password: str, email: str,
-                              pre_authorization: bool, domains: list):
+    def _register_credentials(self, username: str, name: str, password: str, email: str):
         """
         Adds the new user's information to the credentials dictionary.
 
@@ -280,41 +279,25 @@ class AuthenticationHandler:
             Password of the new user.
         email: str
             Email of the new user.
-        pre-authorization: bool
-            Pre-authorization requirement, True: user must be pre-authorized to register, 
-            False: any user can register.
-        domains: list
-            Required list of domains a new email must belong to i.e. ['gmail.com', 'yahoo.com'], 
-            list: the required list of domains, None: any domain is allowed.
         """
-        if not self.validator.validate_email(email):
-            raise RegisterError('Email is not valid')
-        if self._credentials_contains_value(email):
-            raise RegisterError('Email already taken')
-        if domains:
-            if email.split('@')[1] not in ' '.join(domains):
-                raise RegisterError('Email not allowed to register')
-        if not self.validator.validate_username(username):
-            raise RegisterError('Username is not valid')
-        if username in self.credentials['usernames']:
-            raise RegisterError('Username already taken')
-        if not self.validator.validate_name(name):
-            raise RegisterError('Name is not valid')
         self.credentials['usernames'][username] = \
             {'name': name, 'password': Hasher([password]).generate()[0], 'email': email,
              'logged_in': False}
-        if pre_authorization:
-            self.pre_authorized['emails'].remove(email)
-    def register_user(self, new_password: str, new_password_repeat: str, pre_authorization: bool,
-                      new_username: str, new_name: str, new_email: str,
-                      entered_captcha: Optional[str]=None,
-                      domains: Optional[List[str]]=None) -> tuple:
+    def register_user(self, new_name: str, new_email: str, new_username: str,
+                      new_password: str, new_password_repeat: str, pre_authorization: bool,
+                      domains: Optional[List[str]]=None,
+                      entered_captcha: Optional[str]=None) -> tuple:
         """
-        Validates a new user's username, password, and email. Subsequently adds the validated user 
-        details to the credentials dictionary.
+        Validates a new user's name, username, password, and email.
 
         Parameters
         ----------
+        new_name: str
+            Name of the new user.
+        new_email: str
+            Email of the new user.
+        new_username: str
+            Username of the new user.
         new_password: str
             Password of the new user.
         new_password_repeat: str
@@ -322,37 +305,43 @@ class AuthenticationHandler:
         pre-authorization: bool
             Pre-authorization requirement, True: user must be pre-authorized to register, 
             False: any user can register.
-        new_username: str
-            Username of the new user.
-        new_name: str
-            Name of the new user.
-        new_email: str
-            Email of the new user.
-        entered_captcha: str
-            User entered captcha to validate against the generated captcha.
         domains: list
             Required list of domains a new email must belong to i.e. ['gmail.com', 'yahoo.com'], 
             list: the required list of domains, None: any domain is allowed.
+        entered_captcha: str
+            User entered captcha to validate against the generated captcha.
 
         Returns
         -------
         tuple
             Email of the new user; username of the new user; name of the new user.
         """
-        self._check_captcha('register_user_captcha', entered_captcha)
+        if not self.validator.validate_name(new_name):
+            raise RegisterError('Name is not valid')
+        if not self.validator.validate_email(new_email):
+            raise RegisterError('Email is not valid')
+        if self._credentials_contains_value(new_email):
+            raise RegisterError('Email already taken')
+        if domains:
+            if new_email.split('@')[1] not in ' '.join(domains):
+                raise RegisterError('Email not allowed to register')
+        if not self.validator.validate_username(new_username):
+            raise RegisterError('Username is not valid')
+        if new_username in self.credentials['usernames']:
+            raise RegisterError('Username already taken')
         if not self.validator.validate_length(new_password, 1) \
             or not self.validator.validate_length(new_password_repeat, 1):
             raise RegisterError('Password/repeat password fields cannot be empty')
         if new_password != new_password_repeat:
             raise RegisterError('Passwords do not match')
+        self._check_captcha('register_user_captcha', entered_captcha)
         if pre_authorization:
             if new_email in self.pre_authorized['emails']:
-                self._register_credentials(new_username, new_name, new_password, new_email,
-                                            pre_authorization, domains)
+                self._register_credentials(new_username, new_name, new_password, new_email)
+                self.pre_authorized['emails'].remove(new_email)
                 return new_email, new_username, new_name
             raise RegisterError('User not pre-authorized to register')
-        self._register_credentials(new_username, new_name, new_password, new_email,
-                                    pre_authorization, domains)
+        self._register_credentials(new_username, new_name, new_password, new_email)
         return new_email, new_username, new_name
     def reset_password(self, username: str, password: str, new_password: str,
                        new_password_repeat: str) -> bool:
