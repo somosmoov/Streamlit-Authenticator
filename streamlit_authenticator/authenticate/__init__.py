@@ -370,10 +370,9 @@ class Authenticate:
             if callback:
                 callback({'new_name': new_name, 'new_email': new_email,
                           'new_username': new_username})
-            return self.authentication_handler.register_user(new_password, new_password_repeat,
-                                                             pre_authorization, new_username,
-                                                             new_name, new_email, entered_captcha,
-                                                             domains)
+            return self.authentication_handler.register_user(new_name, new_email, new_username,
+                                                             new_password, new_password_repeat,
+                                                             pre_authorization, domains, captcha)
         return None, None, None
     def reset_password(self, username: str, location: str='main',
                        fields: Optional[Dict[str, str]]=None, clear_on_submit: bool=False,
