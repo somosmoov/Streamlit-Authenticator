@@ -10,7 +10,7 @@ Libraries imported:
 """
 
 import time
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 import streamlit as st
 
 from utilities.helpers import Helpers
@@ -56,7 +56,7 @@ class Authenticate:
                                                           cookie_expiry_days)
     def forgot_password(self, location: str='main', fields: Optional[Dict[str, str]]=None,
                         captcha: bool=False, clear_on_submit: bool=False,
-                        key: str='Forgot password') -> tuple:
+                        key: str='Forgot password', callback: Optional[Callable]=None) -> tuple:
         """
         Creates a forgot password widget.
 
@@ -73,6 +73,8 @@ class Authenticate:
             Clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
         key: str
             Unique key provided to widgets to avoid duplicate WidgetID errors.
+        callback: Callable
+            Optional callback function that will be invoked on form submission.
 
         Returns
         -------
@@ -108,11 +110,13 @@ class Authenticate:
             forgot_password_form.image(Helpers.generate_captcha('forgot_password_captcha'))
         if forgot_password_form.form_submit_button('Submit' if 'Submit' not in fields
                                                    else fields['Submit']):
+            if callback:
+                callback({'username': username})
             return self.authentication_handler.forgot_password(username, entered_captcha)
         return None, None, None
     def forgot_username(self, location: str='main', fields: Optional[Dict[str, str]]=None,
                         captcha: bool=False, clear_on_submit: bool=False,
-                        key: str='Forgot username') -> tuple:
+                        key: str='Forgot username', callback: Optional[Callable]=None) -> tuple:
         """
         Creates a forgot username widget.
 
@@ -129,6 +133,8 @@ class Authenticate:
             Clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
         key: str
             Unique key provided to widgets to avoid duplicate WidgetID errors.
+        callback: Callable
+            Optional callback function that will be invoked on form submission.
 
         Returns
         -------
@@ -162,11 +168,14 @@ class Authenticate:
             forgot_username_form.image(Helpers.generate_captcha('forgot_username_captcha'))
         if forgot_username_form.form_submit_button('Submit' if 'Submit' not in fields
                                                    else fields['Submit']):
+            if callback:
+                callback({'email': email})
             return self.authentication_handler.forgot_username(email, entered_captcha)
         return None, email
     def login(self, location: str='main', max_concurrent_users: Optional[int]=None,
               max_login_attempts: Optional[int]=None, fields: Optional[Dict[str, str]]=None,
-              captcha: bool=False, clear_on_submit: bool=False, key: str='Login') -> tuple:
+              captcha: bool=False, clear_on_submit: bool=False, key: str='Login',
+              callback: Optional[Callable]=None) -> tuple:
         """
         Creates a login widget.
 
@@ -187,6 +196,8 @@ class Authenticate:
             Clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
         key: str
             Unique key provided to widgets to avoid duplicate WidgetID errors.
+        callback: Callable
+            Optional callback function that will be invoked on form submission.
 
         Returns
         -------
@@ -240,9 +251,12 @@ class Authenticate:
                                                                      entered_captcha):
                         self.authentication_handler.execute_login(username=username)
                         self.cookie_handler.set_cookie()
+                    if callback:
+                        callback({'username': username})
         return (st.session_state['name'], st.session_state['authentication_status'],
                 st.session_state['username'])
-    def logout(self, button_name: str='Logout', location: str='main', key: Optional[str]=None):
+    def logout(self, button_name: str='Logout', location: str='main', key: Optional[str]=None,
+               callback: Optional[Callable]=None):
         """
         Creates a logout button.
 
@@ -254,6 +268,8 @@ class Authenticate:
             Location of the logout button i.e. main, sidebar or unrendered.
         key: str
             Unique key to be used in multi-page applications.
+        callback: Callable
+            Optional callback function that will be invoked on submission.
         """
         if location not in ['main', 'sidebar', 'unrendered']:
             raise ValueError("Location must be one of 'main' or 'sidebar' or 'unrendered'")
@@ -261,10 +277,14 @@ class Authenticate:
             if st.button(button_name, key=key):
                 self.authentication_handler.execute_logout()
                 self.cookie_handler.delete_cookie()
+                if callback:
+                    callback({})
         elif location == 'sidebar':
             if st.sidebar.button(button_name, key=key):
                 self.authentication_handler.execute_logout()
                 self.cookie_handler.delete_cookie()
+                if callback:
+                    callback({})
         elif location == 'unrendered':
             if st.session_state['authentication_status']:
                 self.authentication_handler.execute_logout()
@@ -272,7 +292,7 @@ class Authenticate:
     def register_user(self, location: str='main', pre_authorization: bool=True,
                       domains: Optional[List[str]]=None, fields: Optional[Dict[str, str]]=None,
                       captcha: bool=True, clear_on_submit: bool=False,
-                      key: str='Register user') -> tuple:
+                      key: str='Register user', callback: Optional[Callable]=None) -> tuple:
         """
         Creates a register new user widget.
 
@@ -295,6 +315,8 @@ class Authenticate:
             Clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
         key: str
             Unique key provided to widgets to avoid duplicate WidgetID errors.
+        callback: Callable
+            Optional callback function that will be invoked on form submission.
 
         Returns
         -------
@@ -345,6 +367,9 @@ class Authenticate:
             register_user_form.image(Helpers.generate_captcha('register_user_captcha'))
         if register_user_form.form_submit_button('Register' if 'Register' not in fields
                                                  else fields['Register']):
+            if callback:
+                callback({'new_name': new_name, 'new_email': new_email,
+                          'new_username': new_username})
             return self.authentication_handler.register_user(new_password, new_password_repeat,
                                                              pre_authorization, new_username,
                                                              new_name, new_email, entered_captcha,
@@ -352,7 +377,7 @@ class Authenticate:
         return None, None, None
     def reset_password(self, username: str, location: str='main',
                        fields: Optional[Dict[str, str]]=None, clear_on_submit: bool=False,
-                       key: str='Reset password') -> bool:
+                       key: str='Reset password', callback: Optional[Callable]=None) -> bool:
         """
         Creates a password reset widget.
 
@@ -368,6 +393,8 @@ class Authenticate:
             Clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
         key: str
             Unique key provided to widgets to avoid duplicate WidgetID errors.
+        callback: Callable
+            Optional callback function that will be invoked on form submission.
 
         Returns
         -------
@@ -406,13 +433,16 @@ class Authenticate:
                                                              type='password').strip()
         if reset_password_form.form_submit_button('Reset' if 'Reset' not in fields
                                                   else fields['Reset']):
+            if callback:
+                callback({})
             if self.authentication_handler.reset_password(username, password, new_password,
                                                           new_password_repeat):
                 return True
         return None
     def update_user_details(self, username: str, location: str='main',
                             fields: Optional[Dict[str, str]]=None,
-                            clear_on_submit: bool=False, key: str='Update user details') -> bool:
+                            clear_on_submit: bool=False, key: str='Update user details',
+                            callback: Optional[Callable]=None) -> bool:
         """
         Creates a update user details widget.
 
@@ -428,6 +458,8 @@ class Authenticate:
             Clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
         key: str
             Unique key provided to widgets to avoid duplicate WidgetID errors.
+        callback: Callable
+            Optional callback function that will be invoked on form submission.
 
         Returns
         -------
@@ -464,6 +496,8 @@ class Authenticate:
             field = 'email'
         if update_user_details_form.form_submit_button('Update' if 'Update' not in fields
                                                        else fields['Update']):
+            if callback:
+                callback({'field': field, 'new_value': new_value})
             if self.authentication_handler.update_user_details(new_value, username, field):
                 self.cookie_handler.set_cookie()
                 return True
