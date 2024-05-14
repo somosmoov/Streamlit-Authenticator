@@ -30,21 +30,6 @@ class Validator:
         """
         pattern = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b"
         return 2 < len(email) < 320 and bool(re.match(pattern, email))
-    def validate_name(self, name: str) -> bool:
-        """
-        Checks the validity of the entered name.
-        
-        Parameters
-        ----------
-        name: str
-            The name to be validated.
-            
-        Returns
-        -------
-        bool
-            Validity of entered name.
-        """
-        return 1 <= len(name) <= 100
     def validate_length(self, variable: str, min_length: int=0, max_length: int=100) -> bool:
         """
         Checks the length of a variable.
@@ -64,6 +49,37 @@ class Validator:
             Validity of entered variable.
         """
         return min_length <= len(variable) <= max_length
+    def validate_name(self, name: str) -> bool:
+        """
+        Checks the validity of the entered name.
+        
+        Parameters
+        ----------
+        name: str
+            The name to be validated.
+            
+        Returns
+        -------
+        bool
+            Validity of entered name.
+        """
+        return 1 <= len(name) <= 100
+    def validate_password(self, password: str) -> bool:
+        """
+        Checks the validity of the entered password.
+    
+        Parameters
+        ----------
+        password: str
+            The password to be validated.
+            
+        Returns
+        -------
+        bool
+            Validity of entered password.
+        """
+        pattern = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$"
+        return bool(re.match(pattern, password))
     def validate_username(self, username: str) -> bool:
         """
         Checks the validity of the entered username.
