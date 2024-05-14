@@ -334,6 +334,8 @@ class AuthenticationHandler:
             raise RegisterError('Password/repeat password fields cannot be empty')
         if new_password != new_password_repeat:
             raise RegisterError('Passwords do not match')
+        if not self.validator.validate_password(new_password):
+            raise RegisterError('Password does not meet criteria')
         self._check_captcha('register_user_captcha', entered_captcha)
         if pre_authorization:
             if new_email in self.pre_authorized['emails']:
