@@ -120,6 +120,8 @@ authenticator.login()
 >    - Specifies the captcha requirement for the login widget, True: captcha required, False: captcha removed.
 >  - **clear_on_submit:** _bool, default False_
 >    - Specifies the clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
+>  - **callback:** _Callable, default None_
+>    - Optional callback function that will be invoked on form submission.
 > #### Returns:
 > - _str_
 >   - Name of the authenticated user.
@@ -155,6 +157,8 @@ elif st.session_state["authentication_status"] is None:
 >    - Specifies the location of the logout button. If 'unrendered' is passed, the logout logic will be executed without rendering the button.
 >  - **key:** _str, default None_
 >    - Unique key that should be used in multi-page applications.
+>  - **callback:** _Callable, default None_
+>    - Optional callback function that will be invoked on submission.
 
 ![](https://github.com/mkhorasani/Streamlit-Authenticator/blob/main/graphics/logged_in.JPG)
 
@@ -187,6 +191,8 @@ if st.session_state["authentication_status"]:
 >    - Customizes the text of headers, buttons and other fields.
 >  - **clear_on_submit:** _bool, default False_
 >    - Specifies the clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
+>  - **callback:** _Callable, default None_
+>    - Optional callback function that will be invoked on form submission.
 > #### Returns::
 > - _bool_
 >   - Status of resetting the password.
@@ -222,6 +228,8 @@ except Exception as e:
 >    - Specifies the captcha requirement for the register user widget, True: captcha required, False: captcha removed.
 >  - **clear_on_submit:** _bool, default False_
 >    - Specifies the clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
+>  - **callback:** _Callable, default None_
+>    - Optional callback function that will be invoked on form submission.
 > #### Returns:
 > - _str_
 >   - Email associated with the new user.
@@ -260,6 +268,8 @@ except Exception as e:
 >    - Specifies the captcha requirement for the forgot password widget, True: captcha required, False: captcha removed.
 >  - **clear_on_submit:** _bool, default False_
 >    - Specifies the clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
+>  - **callback:** _Callable, default None_
+>    - Optional callback function that will be invoked on form submission.
 > #### Returns:
 > - _str_
 >   - Username associated with the forgotten password.
@@ -298,6 +308,8 @@ except Exception as e:
 >    - Specifies the captcha requirement for the forgot username widget, True: captcha required, False: captcha removed.
 >  - **clear_on_submit:** _bool, default False_
 >    - Specifies the clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
+>  - **callback:** _Callable, default None_
+>    - Optional callback function that will be invoked on form submission.
 > #### Returns:
 > - _str_
 >   - Forgotten username that should be transferred to the user securely.
@@ -329,6 +341,8 @@ if st.session_state["authentication_status"]:
 >    - Customizes the text of headers, buttons and other fields.
 >  - **clear_on_submit:** _bool, default False_
 >    - Specifies the clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
+>  - **callback:** _Callable, default None_
+>    - Optional callback function that will be invoked on form submission.
 > #### Returns:
 > - _bool_
 >   - Status of updating the user details.
