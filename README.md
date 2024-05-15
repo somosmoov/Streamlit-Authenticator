@@ -23,7 +23,7 @@ pip install streamlit-authenticator
 
 ## Example
 
-Using Streamlit-Authenticator is as simple as importing the module and calling it to verify your predefined users' credentials.
+Using Streamlit-Authenticator is as simple as importing the module and calling it to verify your user's credentials.
 
 ```python
 import streamlit as st
