@@ -53,6 +53,8 @@ class AuthenticationHandler:
                 if not Hasher._is_hash(self.credentials['usernames'][username]['password']):
                     self.credentials['usernames'][username]['password'] = \
                         Hasher._hash(self.credentials['usernames'][username]['password'])
+        else:
+            self.credentials['usernames'] = {}
         self.pre_authorized = pre_authorized
         self.validator = validator if validator is not None else Validator()
         if 'name' not in st.session_state:

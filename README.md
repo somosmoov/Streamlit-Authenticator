@@ -61,7 +61,7 @@ pre-authorized:
   - melsby@gmail.com
 ```
 
-_Please note that the 'logged_in' field corresponding to each user's log-in status will be added automatically._
+_Please note that the 'failed_login_attempts' and 'logged_in' fields corresponding to each user's number of failed login attempts and log-in status will be added and managed automatically._
 
 ### 2. Creating a login widget
 
@@ -111,7 +111,7 @@ authenticator.login()
 >  - **location:** _str, {'main', 'sidebar'}, default 'main'_
 >    - Specifies the location of the login widget.
 >  - **max_concurrent_users:** _int, default None_
->    - Limits the number of concurrent users. If not specified there will be no limit to the number of users.
+>    - Limits the number of concurrent users. If not specified there will be no limit to the number of concurrently logged in users.
 >  - **max_login_attempts:** _int, default None_
 >    - Limits the number of failed login attempts. If not specified there will be no limit to the number of failed login attempts.
 >  - **fields:** _dict, default {'Form name':'Login', 'Username':'Username', 'Password':'Password', 'Login':'Login'}_
@@ -134,7 +134,7 @@ authenticator.login()
 
 ### 3. Authenticating users
 
-* You can then retrieve the name, authentication status, and username from Streamlit's session state using **st.session_state["name"]**, **st.session_state["authentication_status"]**, and **st.session_state["username"]** to allow a verified user to proceed to any restricted content.
+* You can then retrieve the name, authentication status, and username from Streamlit's session state using **st.session_state["name"]**, **st.session_state["authentication_status"]**, and **st.session_state["username"]** to allow a verified user to access restricted content.
 * You may also render a logout button, or may choose not to render the button if you only need to implement the logout logic programmatically.
 * The optional **key** parameter for the logout button should be used with multi-page applications to prevent Streamlit from throwing duplicate key errors.
 
@@ -153,7 +153,7 @@ elif st.session_state["authentication_status"] is None:
 > #### Parameters:
 >  - **button_name:** _str, default 'Logout'_
 >    - Customizes the button name.
->  - **location:** _str, {'main', 'sidebar','unrendered'}, default 'main'_
+>  - **location:** _str, {'main', 'sidebar', 'unrendered'}, default 'main'_
 >    - Specifies the location of the logout button. If 'unrendered' is passed, the logout logic will be executed without rendering the button.
 >  - **key:** _str, default None_
 >    - Unique key that should be used in multi-page applications.
