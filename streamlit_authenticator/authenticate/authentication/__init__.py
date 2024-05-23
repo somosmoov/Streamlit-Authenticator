@@ -40,21 +40,23 @@ class AuthenticationHandler:
             Validator object that checks the validity of the username, name, and email fields.
         """
         self.credentials = credentials
-        if self.credentials['usernames']:
-            self.credentials['usernames'] = {
-                                            key.lower(): value
-                                            for key, value in credentials['usernames'].items()
-                                            }
-            for username, _ in self.credentials['usernames'].items():
-                if 'logged_in' not in self.credentials['usernames'][username]:
-                    self.credentials['usernames'][username]['logged_in'] = False
-                if 'failed_login_attempts' not in self.credentials['usernames'][username]:
-                    self.credentials['usernames'][username]['failed_login_attempts'] = 0
-                if not Hasher._is_hash(self.credentials['usernames'][username]['password']):
-                    self.credentials['usernames'][username]['password'] = \
-                        Hasher._hash(self.credentials['usernames'][username]['password'])
+        if self.credentials:
+            if 'usernames' in self.credentials:
+                self.credentials.update(self.credentials.pop('usernames'))
+            self.credentials = {
+                                key.lower(): value
+                                for key, value in credentials.items()
+                                }
+            for key, _ in self.credentials.items():
+                if 'logged_in' not in self.credentials[key]:
+                    self.credentials[key]['logged_in'] = False
+                if 'failed_login_attempts' not in self.credentials[key]:
+                    self.credentials[key]['failed_login_attempts'] = 0
+                if not Hasher._is_hash(self.credentials[key]['password']):
+                    self.credentials[key]['password'] = \
+                        Hasher._hash(self.credentials[key]['password'])
         else:
-            self.credentials['usernames'] = {}
+            self.credentials = {}
         self.pre_authorized = pre_authorized
         self.validator = validator if validator is not None else Validator()
         if 'name' not in st.session_state:
@@ -109,13 +111,13 @@ class AuthenticationHandler:
         if isinstance(max_concurrent_users, int):
             if self._count_concurrent_users() > max_concurrent_users - 1:
                 raise LoginError('Maximum number of concurrent users exceeded')
-        if username in self.credentials['usernames']:
+        if username in self.credentials:
             if isinstance(max_login_attempts, int):
-                if self.credentials['usernames'][username]['failed_login_attempts'] >= \
+                if self.credentials[username]['failed_login_attempts'] >= \
                     max_login_attempts:
                     raise LoginError('Maximum number of login attempts exceeded')
             try:
-                if Hasher.check_pw(password, self.credentials['usernames'][username]['password']):
+                if Hasher.check_pw(password, self.credentials[username]['password']):
                     return True
                 st.session_state['authentication_status'] = False
                 self._record_failed_login_attempts(username)
@@ -138,8 +140,8 @@ class AuthenticationHandler:
             Number of users logged in concurrently.
         """
         concurrent_users = 0
-        for username, _ in self.credentials['usernames'].items():
-            if self.credentials['usernames'][username]['logged_in']:
+        for username, _ in self.credentials.items():
+            if self.credentials[username]['logged_in']:
                 concurrent_users += 1
         return concurrent_users
     def _credentials_contains_value(self, value: str) -> bool:
@@ -154,9 +156,11 @@ class AuthenticationHandler:
         Returns
         -------
         bool
-            Presence/absence of the value, True: value present, False value absent.
+            Presence/absence of the value, 
+            True: value present, 
+            False value absent.
         """
-        return any(value in d.values() for d in self.credentials['usernames'].values())
+        return any(value in d.values() for d in self.credentials.values())
     def execute_login(self, username: Optional[str]=None, token: Optional[Dict[str, str]]=None):
         """
         Executes login by setting authentication status to true and adding the user's
@@ -171,20 +175,20 @@ class AuthenticationHandler:
         """
         if username:
             st.session_state['username'] = username
-            st.session_state['name'] = self.credentials['usernames'][username]['name']
+            st.session_state['name'] = self.credentials[username]['name']
             st.session_state['authentication_status'] = True
             self._record_failed_login_attempts(username, reset=True)
-            self.credentials['usernames'][username]['logged_in'] = True
+            self.credentials[username]['logged_in'] = True
         elif token:
             st.session_state['username'] = token['username']
-            st.session_state['name'] = self.credentials['usernames'][token['username']]['name']
+            st.session_state['name'] = self.credentials[token['username']]['name']
             st.session_state['authentication_status'] = True
-            self.credentials['usernames'][token['username']]['logged_in'] = True
+            self.credentials[token['username']]['logged_in'] = True
     def execute_logout(self):
         """
         Clears cookie and session state variables associated with the logged in user.
         """
-        self.credentials['usernames'][st.session_state['username']]['logged_in'] = False
+        self.credentials[st.session_state['username']]['logged_in'] = False
         st.session_state['logout'] = True
         st.session_state['name'] = None
         st.session_state['username'] = None
@@ -208,8 +212,8 @@ class AuthenticationHandler:
         self._check_captcha('forgot_password_captcha', entered_captcha)
         if not self.validator.validate_length(username, 1):
             raise ForgotError('Username not provided')
-        if username in self.credentials['usernames']:
-            return (username, self.credentials['usernames'][username]['email'],
+        if username in self.credentials:
+            return (username, self.credentials[username]['email'],
                     self._set_random_password(username))
         else:
             return False, None, None
@@ -249,7 +253,7 @@ class AuthenticationHandler:
         str
             Username associated with the given key, value pair i.e. "jsmith".
         """
-        for username, values in self.credentials['usernames'].items():
+        for username, values in self.credentials.items():
             if values[key] == value:
                 return username
         return False
@@ -260,14 +264,14 @@ class AuthenticationHandler:
         Parameters
         ----------
         reset: bool            
-            Reset failed login attempts option, True: number of failed login attempts
-            for the user will be reset to 0, 
+            Reset failed login attempts option, 
+            True: number of failed login attempts for the user will be reset to 0, 
             False: number of failed login attempts for the user will be incremented.
         """
         if reset:
-            self.credentials['usernames'][username]['failed_login_attempts'] = 0
+            self.credentials[username]['failed_login_attempts'] = 0
         else:
-            self.credentials['usernames'][username]['failed_login_attempts'] += 1
+            self.credentials[username]['failed_login_attempts'] += 1
     def _register_credentials(self, username: str, name: str, password: str, email: str):
         """
         Adds the new user's information to the credentials dictionary.
@@ -283,7 +287,7 @@ class AuthenticationHandler:
         email: str
             Email of the new user.
         """
-        self.credentials['usernames'][username] = \
+        self.credentials[username] = \
             {'name': name, 'password': Hasher([password]).generate()[0], 'email': email,
              'logged_in': False}
     def register_user(self, new_name: str, new_email: str, new_username: str,
@@ -306,11 +310,13 @@ class AuthenticationHandler:
         new_password_repeat: str
             Repeated password of the new user.
         pre-authorization: bool
-            Pre-authorization requirement, True: user must be pre-authorized to register, 
+            Pre-authorization requirement, 
+            True: user must be pre-authorized to register, 
             False: any user can register.
         domains: list
             Required list of domains a new email must belong to i.e. ['gmail.com', 'yahoo.com'], 
-            list: the required list of domains, None: any domain is allowed.
+            list: the required list of domains, 
+            None: any domain is allowed.
         entered_captcha: str
             User entered captcha to validate against the generated captcha.
 
@@ -330,7 +336,7 @@ class AuthenticationHandler:
                 raise RegisterError('Email not allowed to register')
         if not self.validator.validate_username(new_username):
             raise RegisterError('Username is not valid')
-        if new_username in self.credentials['usernames']:
+        if new_username in self.credentials:
             raise RegisterError('Username already taken')
         if not self.validator.validate_length(new_password, 1) \
             or not self.validator.validate_length(new_password_repeat, 1):
@@ -368,7 +374,8 @@ class AuthenticationHandler:
         Returns
         -------
         bool
-            State of resetting the password, True: password reset successfully.
+            State of resetting the password, 
+            True: password reset successfully.
         """
         if self.check_credentials(username, password):
             if not self.validator.validate_length(new_password, 1):
@@ -378,10 +385,10 @@ class AuthenticationHandler:
             if password != new_password:
                 self._update_password(username, new_password)
                 return True
-            else:
-                raise ResetError('New and current passwords are the same')
-        else:
-            raise CredentialsError('password')
+            if not self.validator.validate_password(new_password):
+                raise ResetError('Password does not meet criteria')
+            raise ResetError('New and current passwords are the same')
+        raise CredentialsError('password')
     def _set_random_password(self, username: str) -> str:
         """
         Updates the credentials dictionary with the user's hashed random password.
@@ -397,7 +404,7 @@ class AuthenticationHandler:
             New plain text password that should be transferred to the user securely.
         """
         random_password = Helpers.generate_random_pw()
-        self.credentials['usernames'][username]['password'] = \
+        self.credentials[username]['password'] = \
             Hasher([random_password]).generate()[0]
         return random_password
     def _update_entry(self, username: str, key: str, value: str):
@@ -413,7 +420,7 @@ class AuthenticationHandler:
         value: str
             Updated entry value i.e. "jsmith@gmail.com".
         """
-        self.credentials['usernames'][username][key] = value
+        self.credentials[username][key] = value
     def _update_password(self, username: str, password: str):
         """
         Updates the credentials dictionary with the user's hashed reset password.
@@ -425,7 +432,7 @@ class AuthenticationHandler:
         password: str
             Updated plain text password.
         """
-        self.credentials['usernames'][username]['password'] = Hasher([password]).generate()[0]
+        self.credentials[username]['password'] = Hasher([password]).generate()[0]
     def update_user_details(self, new_value: str, username: str, field: str) -> bool:
         """
         Validates the user's updated name or email and subsequently modifies it in the
@@ -443,7 +450,8 @@ class AuthenticationHandler:
         Returns
         -------
         bool
-            State of updating the user's detail, True: details updated successfully.
+            State of updating the user's detail, 
+            True: details updated successfully.
         """
         if field == 'name':
             if not self.validator.validate_name(new_value):
@@ -453,7 +461,7 @@ class AuthenticationHandler:
                 raise UpdateError('Email is not valid')
             if self._credentials_contains_value(new_value):
                 raise UpdateError('Email already taken')
-        if new_value != self.credentials['usernames'][username][field]:
+        if new_value != self.credentials[username][field]:
             self._update_entry(username, field, new_value)
             if field == 'name':
                 st.session_state['name'] = new_value

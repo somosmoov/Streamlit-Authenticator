@@ -67,10 +67,13 @@ class Authenticate:
         fields: dict
             Rendered names of the fields/buttons.
         captcha: bool
-            Captcha requirement for the forgot password widget, True: captcha required,
+            Captcha requirement for the forgot password widget, 
+            True: captcha required,
             False: captcha removed.
         clear_on_submit: bool
-            Clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
+            Clear on submit setting, 
+            True: clears inputs on submit, 
+            False: keeps inputs on submit.
         key: str
             Unique key provided to widgets to avoid duplicate WidgetID errors.
         callback: Callable
@@ -127,10 +130,13 @@ class Authenticate:
         fields: dict
             Rendered names of the fields/buttons.
         captcha: bool
-            Captcha requirement for the forgot username widget, True: captcha required,
+            Captcha requirement for the forgot username widget, 
+            True: captcha required,
             False: captcha removed.
         clear_on_submit: bool
-            Clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
+            Clear on submit setting, 
+            True: clears inputs on submit, 
+            False: keeps inputs on submit.
         key: str
             Unique key provided to widgets to avoid duplicate WidgetID errors.
         callback: Callable
@@ -190,10 +196,13 @@ class Authenticate:
         fields: dict
             Rendered names of the fields/buttons.
         captcha: bool
-            Captcha requirement for the login widget, True: captcha required,
+            Captcha requirement for the login widget, 
+            True: captcha required,
             False: captcha removed.
         clear_on_submit: bool
-            Clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
+            Clear on submit setting, 
+            True: clears inputs on submit, 
+            False: keeps inputs on submit.
         key: str
             Unique key provided to widgets to avoid duplicate WidgetID errors.
         callback: Callable
@@ -204,8 +213,10 @@ class Authenticate:
         str
             Name of the authenticated user.
         bool
-            Status of authentication, None: no credentials entered, 
-            False: incorrect credentials, True: correct credentials.
+            Status of authentication, 
+            None: no credentials entered, 
+            True: correct credentials, 
+            False: incorrect credentials.
         str
             Username of the authenticated user.
         """
@@ -301,18 +312,23 @@ class Authenticate:
         location: str
             Location of the register new user widget i.e. main or sidebar.
         pre-authorization: bool
-            Pre-authorization requirement, True: user must be pre-authorized to register, 
+            Pre-authorization requirement, 
+            True: user must be pre-authorized to register, 
             False: any user can register.
         domains: list
             Required list of domains a new email must belong to i.e. ['gmail.com', 'yahoo.com'], 
-            list: required list of domains, None: any domain is allowed.
+            list: required list of domains, 
+            None: any domain is allowed.
         fields: dict
             Rendered names of the fields/buttons.
         captcha: bool
-            Captcha requirement for the register user widget, True: captcha required,
+            Captcha requirement for the register user widget, 
+            True: captcha required,
             False: captcha removed.
         clear_on_submit: bool
-            Clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
+            Clear on submit setting, 
+            True: clears inputs on submit, 
+            False: keeps inputs on submit.
         key: str
             Unique key provided to widgets to avoid duplicate WidgetID errors.
         callback: Callable
@@ -389,7 +405,9 @@ class Authenticate:
         fields: dict
             Rendered names of the fields/buttons.
         clear_on_submit: bool
-            Clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
+            Clear on submit setting, 
+            True: clears inputs on submit, 
+            False: keeps inputs on submit.
         key: str
             Unique key provided to widgets to avoid duplicate WidgetID errors.
         callback: Callable
@@ -454,7 +472,9 @@ class Authenticate:
         fields: dict
             Rendered names of the fields/buttons.
         clear_on_submit: bool
-            Clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
+            Clear on submit setting, 
+            True: clears inputs on submit, 
+            False: keeps inputs on submit.
         key: str
             Unique key provided to widgets to avoid duplicate WidgetID errors.
         callback: Callable

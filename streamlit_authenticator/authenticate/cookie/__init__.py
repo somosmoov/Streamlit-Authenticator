@@ -54,7 +54,7 @@ class CookieHandler:
         if self.token is not None:
             self.token = self._token_decode()
             if (self.token is not False and 'username' in self.token and
-                self.token['exp_date'] > datetime.utcnow().timestamp()):
+                self.token['exp_date'] > datetime.now().timestamp()):
                 return self.token
         return None
     def delete_cookie(self):
