@@ -38,27 +38,25 @@ if not _RELEASE:
 
     # Creating a login widget
     try:
-        authenticator.login()
+        authenticator.login(max_concurrent_users=2)
     except LoginError as e:
         st.error(e)
 
-    if st.session_state["authentication_status"]:
+    if st.session_state['authentication_status']:
         authenticator.logout()
         st.write(f'Welcome *{st.session_state["name"]}*')
         st.title('Some content')
-    elif st.session_state["authentication_status"] is False:
+    elif st.session_state['authentication_status'] is False:
         st.error('Username/password is incorrect')
-    elif st.session_state["authentication_status"] is None:
+    elif st.session_state['authentication_status'] is None:
         st.warning('Please enter your username and password')
 
     # Creating a password reset widget
-    if st.session_state["authentication_status"]:
+    if st.session_state['authentication_status']:
         try:
-            if authenticator.reset_password(st.session_state["username"]):
+            if authenticator.reset_password(st.session_state['username']):
                 st.success('Password modified successfully')
-        except ResetError as e:
-            st.error(e)
-        except CredentialsError as e:
+        except (CredentialsError, ResetError) as e:
             st.error(e)
 
     # # Creating a new user registration widget
@@ -97,9 +95,9 @@ if not _RELEASE:
         st.error(e)
 
     # # Creating an update user details widget
-    if st.session_state["authentication_status"]:
+    if st.session_state['authentication_status']:
         try:
-            if authenticator.update_user_details(st.session_state["username"]):
+            if authenticator.update_user_details(st.session_state['username']):
                 st.success('Entries updated successfully')
         except UpdateError as e:
             st.error(e)

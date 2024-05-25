@@ -95,10 +95,7 @@ class CookieHandler:
         """
         try:
             return jwt.decode(self.token, self.cookie_key, algorithms=['HS256'])
-        except InvalidSignatureError as e:
-            print(e)
-            return False
-        except DecodeError as e:
+        except (DecodeError, InvalidSignatureError) as e:
             print(e)
             return False
     def _token_encode(self) -> str:

@@ -2,7 +2,7 @@
 <!--- [![Downloads](https://pepy.tech/badge/streamlit-authenticator)](https://pepy.tech/project/streamlit-authenticator) --->
 <!--- [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/khorasani) --->
 
-**A secure authentication module to validate user credentials in a Streamlit application** 
+**A secure authentication module to validate user credentials in a Streamlit application**
 
 [![Downloads](https://static.pepy.tech/badge/streamlit-authenticator)](https://pepy.tech/project/streamlit-authenticator)
 [![Downloads](https://static.pepy.tech/badge/streamlit-authenticator/month)](https://pepy.tech/project/streamlit-authenticator)
@@ -94,9 +94,9 @@ authenticator = stauth.Authenticate(
 >    - Specifies the key that will be used to hash the signature of the re-authentication cookie.
 >  - **cookie_expiry_days:** _float, default 30.0_
 >    - Specifies the number of days before the re-authentication cookie automatically expires on the client's browser.
->  - **pre_authorized:** _list, default None_
+>  - **pre_authorized:** _list, optional, default None_
 >    - Provides the list of emails of unregistered users who are authorized to register.
->  - **validator:** _object, default None_
+>  - **validator:** _Validator, optional, default None_
 >    - Provides a validator object that will check the validity of the username, name, and email fields.
 
 * Then render the login module as follows.
@@ -110,17 +110,17 @@ authenticator.login()
 > #### Parameters:
 >  - **location:** _str, {'main', 'sidebar'}, default 'main'_
 >    - Specifies the location of the login widget.
->  - **max_concurrent_users:** _int, default None_
+>  - **max_concurrent_users:** _int, optional, default None_
 >    - Limits the number of concurrent users. If not specified there will be no limit to the number of concurrently logged in users.
->  - **max_login_attempts:** _int, default None_
+>  - **max_login_attempts:** _int, optional, default None_
 >    - Limits the number of failed login attempts. If not specified there will be no limit to the number of failed login attempts.
->  - **fields:** _dict, default {'Form name':'Login', 'Username':'Username', 'Password':'Password', 'Login':'Login'}_
+>  - **fields:** _dict, optional, default {'Form name':'Login', 'Username':'Username', 'Password':'Password', 'Login':'Login'}_
 >    - Customizes the text of headers, buttons and other fields.
 >  - **captcha:** _bool, default False_
 >    - Specifies the captcha requirement for the login widget, True: captcha required, False: captcha removed.
 >  - **clear_on_submit:** _bool, default False_
 >    - Specifies the clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
->  - **callback:** _Callable, default None_
+>  - **callback:** _callable, optional, default None_
 >    - Optional callback function that will be invoked on form submission.
 > #### Returns:
 > - _str_
@@ -134,18 +134,18 @@ authenticator.login()
 
 ### 3. Authenticating users
 
-* You can then retrieve the name, authentication status, and username from Streamlit's session state using **st.session_state["name"]**, **st.session_state["authentication_status"]**, and **st.session_state["username"]** to allow a verified user to access restricted content.
+* You can then retrieve the name, authentication status, and username from Streamlit's session state using **st.session_state['name']**, **st.session_state['authentication_status']**, and **st.session_state['username']** to allow a verified user to access restricted content.
 * You may also render a logout button, or may choose not to render the button if you only need to implement the logout logic programmatically.
 * The optional **key** parameter for the logout button should be used with multi-page applications to prevent Streamlit from throwing duplicate key errors.
 
 ```python
-if st.session_state["authentication_status"]:
+if st.session_state['authentication_status']:
     authenticator.logout()
     st.write(f'Welcome *{st.session_state["name"]}*')
     st.title('Some content')
-elif st.session_state["authentication_status"] is False:
+elif st.session_state['authentication_status'] is False:
     st.error('Username/password is incorrect')
-elif st.session_state["authentication_status"] is None:
+elif st.session_state['authentication_status'] is None:
     st.warning('Please enter your username and password')
 ```
 
@@ -157,7 +157,7 @@ elif st.session_state["authentication_status"] is None:
 >    - Specifies the location of the logout button. If 'unrendered' is passed, the logout logic will be executed without rendering the button.
 >  - **key:** _str, default None_
 >    - Unique key that should be used in multi-page applications.
->  - **callback:** _Callable, default None_
+>  - **callback:** _callable, optional, default None_
 >    - Optional callback function that will be invoked on submission.
 
 ![](https://github.com/mkhorasani/Streamlit-Authenticator/blob/main/graphics/logged_in.JPG)
@@ -173,9 +173,9 @@ elif st.session_state["authentication_status"] is None:
 * You may use the **reset_password** widget to allow a logged in user to modify their password as shown below.
 
 ```python
-if st.session_state["authentication_status"]:
+if st.session_state['authentication_status']:
     try:
-        if authenticator.reset_password(st.session_state["username"]):
+        if authenticator.reset_password(st.session_state['username']):
             st.success('Password modified successfully')
     except Exception as e:
         st.error(e)
@@ -187,11 +187,11 @@ if st.session_state["authentication_status"]:
 >    - Specifies the username of the user to reset the password for.
 >  - **location:** _str, {'main', 'sidebar'}, default 'main'_
 >    - Specifies the location of the reset password widget.
->  - **fields:** _dict, default {'Form name':'Reset password', 'Current password':'Current password', 'New password':'New password', 'Repeat password': 'Repeat password', 'Reset':'Reset'}_
+>  - **fields:** _dict, optional, default {'Form name':'Reset password', 'Current password':'Current password', 'New password':'New password', 'Repeat password': 'Repeat password', 'Reset':'Reset'}_
 >    - Customizes the text of headers, buttons and other fields.
 >  - **clear_on_submit:** _bool, default False_
 >    - Specifies the clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
->  - **callback:** _Callable, default None_
+>  - **callback:** _callable, optional, default None_
 >    - Optional callback function that will be invoked on form submission.
 > #### Returns::
 > - _bool_
@@ -220,15 +220,15 @@ except Exception as e:
 >    - Specifies the location of the register user widget.
 >  - **pre_authorization:** _bool, default True_
 >    - Specifies the pre-authorization requirement, True: user must be pre-authorized to register, False: any user can register.
->  - **domains:** _list, default None_
+>  - **domains:** _list, optional, default None_
 >    - Specifies the required list of domains a new email must belong to i.e. ['gmail.com', 'yahoo.com'], list: the required list of domains, None: any domain is allowed.
->  - **fields:** _dict, default {'Form name':'Register user', 'Email':'Email', 'Username':'Username', 'Password':'Password', 'Repeat password':'Repeat password', 'Register':'Register'}_
+>  - **fields:** _dict, optional, default {'Form name':'Register user', 'Email':'Email', 'Username':'Username', 'Password':'Password', 'Repeat password':'Repeat password', 'Register':'Register'}_
 >    - Customizes the text of headers, buttons and other fields.
 >  - **captcha:** _bool, default True_
 >    - Specifies the captcha requirement for the register user widget, True: captcha required, False: captcha removed.
 >  - **clear_on_submit:** _bool, default False_
 >    - Specifies the clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
->  - **callback:** _Callable, default None_
+>  - **callback:** _callable, optional, default None_
 >    - Optional callback function that will be invoked on form submission.
 > #### Returns:
 > - _str_
@@ -262,13 +262,13 @@ except Exception as e:
 > #### Parameters
 >  - **location:** _str, {'main', 'sidebar'}, default 'main'_
 >    - Specifies the location of the forgot password widget.
->  - **fields:** _dict, default {'Form name':'Forgot password', 'Username':'Username', 'Submit':'Submit'}_
+>  - **fields:** _dict, optional, default {'Form name':'Forgot password', 'Username':'Username', 'Submit':'Submit'}_
 >    - Customizes the text of headers, buttons and other fields.
 >  - **captcha:** _bool, default False_
 >    - Specifies the captcha requirement for the forgot password widget, True: captcha required, False: captcha removed.
 >  - **clear_on_submit:** _bool, default False_
 >    - Specifies the clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
->  - **callback:** _Callable, default None_
+>  - **callback:** _callable, optional, default None_
 >    - Optional callback function that will be invoked on form submission.
 > #### Returns:
 > - _str_
@@ -302,13 +302,13 @@ except Exception as e:
 > #### Parameters
 >  - **location:** _str, {'main', 'sidebar'}, default 'main'_
 >    - Specifies the location of the forgot username widget.
->  - **fields:** _dict, default {'Form name':'Forgot username', 'Email':'Email', 'Submit':'Submit'}_
+>  - **fields:** _dict, optional, default {'Form name':'Forgot username', 'Email':'Email', 'Submit':'Submit'}_
 >    - Customizes the text of headers, buttons and other fields.
 >  - **captcha:** _bool, default False_
 >    - Specifies the captcha requirement for the forgot username widget, True: captcha required, False: captcha removed.
 >  - **clear_on_submit:** _bool, default False_
 >    - Specifies the clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
->  - **callback:** _Callable, default None_
+>  - **callback:** _callable, optional, default None_
 >    - Optional callback function that will be invoked on form submission.
 > #### Returns:
 > - _str_
@@ -323,9 +323,9 @@ except Exception as e:
 * You may use the **update_user_details** widget to allow a logged in user to update their name and/or email. The widget will automatically save the updated details in both the configuration file and re-authentication cookie.
 
 ```python
-if st.session_state["authentication_status"]:
+if st.session_state['authentication_status']:
     try:
-        if authenticator.update_user_details(st.session_state["username"]):
+        if authenticator.update_user_details(st.session_state['username']):
             st.success('Entries updated successfully')
     except Exception as e:
         st.error(e)
@@ -337,11 +337,11 @@ if st.session_state["authentication_status"]:
 >    - Specifies the username of the user to update user details for.
 >  - **location:** _str, {'main', 'sidebar'}, default 'main'_
 >    - Specifies the location of the update user details widget.
->  - **fields:** _dict, default {'Form name':'Update user details', 'Field':'Field', 'Name':'Name', 'Email':'Email', 'New value':'New value', 'Update':'Update'}_
+>  - **fields:** _dict, optional, default {'Form name':'Update user details', 'Field':'Field', 'Name':'Name', 'Email':'Email', 'New value':'New value', 'Update':'Update'}_
 >    - Customizes the text of headers, buttons and other fields.
 >  - **clear_on_submit:** _bool, default False_
 >    - Specifies the clear on submit setting, True: clears inputs on submit, False: keeps inputs on submit.
->  - **callback:** _Callable, default None_
+>  - **callback:** _callable, optional, default None_
 >    - Optional callback function that will be invoked on form submission.
 > #### Returns:
 > - _bool_

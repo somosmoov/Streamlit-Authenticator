@@ -34,9 +34,9 @@ class AuthenticationHandler:
         ----------
         credentials: dict
             Dictionary of usernames, names, passwords, emails, and other user data.
-        pre-authorized: list
+        pre-authorized: list, optional
             List of emails of unregistered users who are authorized to register.        
-        validator: Validator
+        validator: Validator, optional
             Validator object that checks the validity of the username, name, and email fields.
         """
         self.credentials = credentials
@@ -73,7 +73,7 @@ class AuthenticationHandler:
         ----------
         captcha_name: str
             Name of the generated captcha stored in the session state.
-        entered_captcha: str
+        entered_captcha: str, optional
             User entered captcha to validate against the generated captcha.
         """
         if entered_captcha or entered_captcha == '':
@@ -93,11 +93,11 @@ class AuthenticationHandler:
             The entered username.
         password: str
             The entered password.
-        max_concurrent_users: int
+        max_concurrent_users: int, optional
             Maximum number of users allowed to login concurrently.
-        max_login_attempts: int
+        max_login_attempts: int, optional
             Maximum number of failed login attempts a user can make.
-        entered_captcha: str
+        entered_captcha: str, optional
             User entered captcha to validate against the generated captcha.
 
         Returns
@@ -106,28 +106,22 @@ class AuthenticationHandler:
             Validity of the entered credentials.
         """
         self._check_captcha('login_captcha', entered_captcha)
-        if isinstance(max_concurrent_users, int):
-            if self._count_concurrent_users() > max_concurrent_users - 1:
-                raise LoginError('Maximum number of concurrent users exceeded')
-        if username in self.credentials['usernames']:
-            if isinstance(max_login_attempts, int):
-                if self.credentials['usernames'][username]['failed_login_attempts'] >= \
-                    max_login_attempts:
-                    raise LoginError('Maximum number of login attempts exceeded')
-            try:
-                if Hasher.check_pw(password, self.credentials['usernames'][username]['password']):
-                    return True
-                st.session_state['authentication_status'] = False
-                self._record_failed_login_attempts(username)
-                return False
-            except TypeError as e:
-                print(e)
-            except ValueError as e:
-                print(e)
-        else:
-            st.session_state['authentication_status'] = False
+        if isinstance(max_concurrent_users, int) and self._count_concurrent_users() > \
+            max_concurrent_users - 1:
+            raise LoginError('Maximum number of concurrent users exceeded')
+        if username not in self.credentials['usernames']:
             return False
-        return None
+        if isinstance(max_login_attempts, int) and \
+            self.credentials['usernames'][username]['failed_login_attempts'] >= max_login_attempts:
+            raise LoginError('Maximum number of login attempts exceeded')
+        try:
+            if Hasher.check_pw(password, self.credentials['usernames'][username]['password']):
+                return True
+            self._record_failed_login_attempts(username)
+            return False
+        except (TypeError, ValueError) as e:
+            print(e)
+        return False
     def _count_concurrent_users(self) -> int:
         """
         Counts the number of users logged in concurrently.
@@ -166,9 +160,9 @@ class AuthenticationHandler:
 
         Parameters
         ----------
-        username: str
+        username: str, optional
             The username of the user being logged in.
-        token: dict
+        token: dict, optional
             The re-authentication cookie to retrieve the username from.
         """
         if username:
@@ -178,6 +172,8 @@ class AuthenticationHandler:
             self._record_failed_login_attempts(username, reset=True)
             self.credentials['usernames'][username]['logged_in'] = True
         elif token:
+            if not token['username'] in self.credentials['usernames']:
+                raise LoginError('User not authorized')
             st.session_state['username'] = token['username']
             st.session_state['name'] = self.credentials['usernames'][token['username']]['name']
             st.session_state['authentication_status'] = True
@@ -199,7 +195,7 @@ class AuthenticationHandler:
         ----------
         username: str
             Username associated with the forgotten password.
-        entered_captcha: str
+        entered_captcha: str, optional
           User entered captcha to validate against the generated captcha.
 
         Returns
@@ -223,7 +219,7 @@ class AuthenticationHandler:
         ----------
         email: str
             Email associated with the forgotten username.
-        entered_captcha: str
+        entered_captcha: str, optional
           User entered captcha to validate against the generated captcha.
 
         Returns
@@ -311,11 +307,11 @@ class AuthenticationHandler:
             Pre-authorization requirement, 
             True: user must be pre-authorized to register, 
             False: any user can register.
-        domains: list
+        domains: list, optional
             Required list of domains a new email must belong to i.e. ['gmail.com', 'yahoo.com'], 
             list: the required list of domains, 
             None: any domain is allowed.
-        entered_captcha: str
+        entered_captcha: str, optional
             User entered captcha to validate against the generated captcha.
 
         Returns
@@ -386,6 +382,7 @@ class AuthenticationHandler:
         if not self.validator.validate_password(new_password):
             raise ResetError('Password does not meet criteria')
         self._update_password(username, new_password)
+        self._record_failed_login_attempts(username, reset=True)
         return True
     def _set_random_password(self, username: str) -> str:
         """

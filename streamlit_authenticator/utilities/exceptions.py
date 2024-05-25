@@ -54,6 +54,19 @@ class LoginError(Exception):
         self.message = message
         super().__init__(self.message)
 
+class LogoutError(Exception):
+    """
+    Exceptions raised for the Logout button.
+
+    Attributes
+    ----------
+    message: str
+        The custom error message to display.
+    """
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
+
 class RegisterError(Exception):
     """
     Exceptions raised for the register user widget.

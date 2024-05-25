@@ -15,7 +15,7 @@ import streamlit as st
 
 from utilities.helpers import Helpers
 from utilities.validator import Validator
-from utilities.exceptions import DeprecationError
+from utilities.exceptions import DeprecationError, LogoutError, ResetError, UpdateError
 
 from .cookie import CookieHandler
 from .authentication import AuthenticationHandler
@@ -43,9 +43,9 @@ class Authenticate:
         cookie_expiry_days: float
             Number of days before the re-authentication cookie automatically expires on the client's 
             browser.
-        pre-authorized: list
+        pre-authorized: list, optional
             List of emails of unregistered users who are authorized to register.        
-        validator: Validator
+        validator: Validator, optional
             Validator object that checks the validity of the username, name, and email fields.
         """
         self.authentication_handler     =   AuthenticationHandler(credentials,
@@ -64,7 +64,7 @@ class Authenticate:
         ----------
         location: str
             Location of the forgot password widget i.e. main or sidebar.
-        fields: dict
+        fields: dict, optional
             Rendered names of the fields/buttons.
         captcha: bool
             Captcha requirement for the forgot password widget, 
@@ -76,7 +76,7 @@ class Authenticate:
             False: keeps inputs on submit.
         key: str
             Unique key provided to widgets to avoid duplicate WidgetID errors.
-        callback: Callable
+        callback: callable, optional
             Optional callback function that will be invoked on form submission.
 
         Returns
@@ -127,7 +127,7 @@ class Authenticate:
         ----------
         location: str
             Location of the forgot username widget i.e. main or sidebar.
-        fields: dict
+        fields: dict, optional
             Rendered names of the fields/buttons.
         captcha: bool
             Captcha requirement for the forgot username widget, 
@@ -139,7 +139,7 @@ class Authenticate:
             False: keeps inputs on submit.
         key: str
             Unique key provided to widgets to avoid duplicate WidgetID errors.
-        callback: Callable
+        callback: callable, optional
             Optional callback function that will be invoked on form submission.
 
         Returns
@@ -189,11 +189,11 @@ class Authenticate:
         ----------
         location: str
             Location of the logout button i.e. main, sidebar or unrendered.
-        max_concurrent_users: int
+        max_concurrent_users: int, optional
             Maximum number of users allowed to login concurrently.
-        max_login_attempts: int
+        max_login_attempts: int, optional
             Maximum number of failed login attempts a user can make.
-        fields: dict
+        fields: dict, optional
             Rendered names of the fields/buttons.
         captcha: bool
             Captcha requirement for the login widget, 
@@ -205,7 +205,7 @@ class Authenticate:
             False: keeps inputs on submit.
         key: str
             Unique key provided to widgets to avoid duplicate WidgetID errors.
-        callback: Callable
+        callback: callable, optional
             Optional callback function that will be invoked on form submission.
 
         Returns
@@ -234,7 +234,7 @@ class Authenticate:
             token = self.cookie_handler.get_cookie()
             if token:
                 self.authentication_handler.execute_login(token=token)
-            time.sleep(0.7)
+            time.sleep(1)
             if not st.session_state['authentication_status']:
                 if location == 'main':
                     login_form = st.form(key=key, clear_on_submit=clear_on_submit)
@@ -262,11 +262,13 @@ class Authenticate:
                                                                      entered_captcha):
                         self.authentication_handler.execute_login(username=username)
                         self.cookie_handler.set_cookie()
+                    else:
+                        st.session_state['authentication_status'] = False
                     if callback:
                         callback({'username': username})
         return (st.session_state['name'], st.session_state['authentication_status'],
                 st.session_state['username'])
-    def logout(self, button_name: str='Logout', location: str='main', key: Optional[str]=None,
+    def logout(self, button_name: str='Logout', location: str='main', key: str='Logout',
                callback: Optional[Callable]=None):
         """
         Creates a logout button.
@@ -279,9 +281,11 @@ class Authenticate:
             Location of the logout button i.e. main, sidebar or unrendered.
         key: str
             Unique key to be used in multi-page applications.
-        callback: Callable
+        callback: callable, optional
             Optional callback function that will be invoked on submission.
         """
+        if not st.session_state['authentication_status']:
+            raise LogoutError('User must be logged in to use the logout button')
         if location not in ['main', 'sidebar', 'unrendered']:
             raise ValueError("Location must be one of 'main' or 'sidebar' or 'unrendered'")
         if location == 'main':
@@ -315,11 +319,11 @@ class Authenticate:
             Pre-authorization requirement, 
             True: user must be pre-authorized to register, 
             False: any user can register.
-        domains: list
+        domains: list, optional
             Required list of domains a new email must belong to i.e. ['gmail.com', 'yahoo.com'], 
             list: required list of domains, 
             None: any domain is allowed.
-        fields: dict
+        fields: dict, optional
             Rendered names of the fields/buttons.
         captcha: bool
             Captcha requirement for the register user widget, 
@@ -331,7 +335,7 @@ class Authenticate:
             False: keeps inputs on submit.
         key: str
             Unique key provided to widgets to avoid duplicate WidgetID errors.
-        callback: Callable
+        callback: callable, optional
             Optional callback function that will be invoked on form submission.
 
         Returns
@@ -402,7 +406,7 @@ class Authenticate:
             Username of the user to reset the password for.
         location: str
             Location of the password reset widget i.e. main or sidebar.
-        fields: dict
+        fields: dict, optional
             Rendered names of the fields/buttons.
         clear_on_submit: bool
             Clear on submit setting, 
@@ -410,7 +414,7 @@ class Authenticate:
             False: keeps inputs on submit.
         key: str
             Unique key provided to widgets to avoid duplicate WidgetID errors.
-        callback: Callable
+        callback: callable, optional
             Optional callback function that will be invoked on form submission.
 
         Returns
@@ -418,6 +422,8 @@ class Authenticate:
         bool
             Status of resetting the password.
         """
+        if not st.session_state['authentication_status']:
+            raise ResetError('User must be logged in to use the reset password widget')
         if fields is None:
             fields = {'Form name':'Reset password', 'Current password':'Current password',
                       'New password':'New password','Repeat password':'Repeat password',
@@ -469,7 +475,7 @@ class Authenticate:
             Username of the user to update user details for.
         location: str
             Location of the update user details widget i.e. main or sidebar.
-        fields: dict
+        fields: dict, optional
             Rendered names of the fields/buttons.
         clear_on_submit: bool
             Clear on submit setting, 
@@ -477,7 +483,7 @@ class Authenticate:
             False: keeps inputs on submit.
         key: str
             Unique key provided to widgets to avoid duplicate WidgetID errors.
-        callback: Callable
+        callback: callable, optional
             Optional callback function that will be invoked on form submission.
 
         Returns
@@ -485,6 +491,8 @@ class Authenticate:
         bool
             Status of updating the user details.
         """
+        if not st.session_state['authentication_status']:
+            raise UpdateError('User must be logged in to use the update user details widget')
         if fields is None:
             fields = {'Form name':'Update user details', 'Field':'Field', 'Name':'Name',
                       'Email':'Email', 'New value':'New value', 'Update':'Update'} 
