@@ -255,15 +255,9 @@ class Authenticate:
                     login_form.image(Helpers.generate_captcha('login_captcha'))
                 if login_form.form_submit_button('Login' if 'Login' not in fields
                                                  else fields['Login']):
-                    if self.authentication_handler.check_credentials(username,
-                                                                     password,
-                                                                     max_concurrent_users,
-                                                                     max_login_attempts,
-                                                                     entered_captcha):
-                        self.authentication_handler.execute_login(username=username)
+                    if self.authentication_handler.login(username, password, max_concurrent_users,
+                                                         max_login_attempts, entered_captcha):
                         self.cookie_handler.set_cookie()
-                    else:
-                        st.session_state['authentication_status'] = False
                     if callback:
                         callback({'username': username})
         return (st.session_state['name'], st.session_state['authentication_status'],
@@ -306,8 +300,8 @@ class Authenticate:
                 self.cookie_handler.delete_cookie()
     def register_user(self, location: str='main', pre_authorization: bool=True,
                       domains: Optional[List[str]]=None, fields: Optional[Dict[str, str]]=None,
-                      captcha: bool=True, clear_on_submit: bool=False,
-                      key: str='Register user', callback: Optional[Callable]=None) -> tuple:
+                      captcha: bool=True, clear_on_submit: bool=False, key: str='Register user',
+                      callback: Optional[Callable]=None) -> tuple:
         """
         Creates a register new user widget.
 
@@ -392,7 +386,8 @@ class Authenticate:
                           'new_username': new_username})
             return self.authentication_handler.register_user(new_name, new_email, new_username,
                                                              new_password, new_password_repeat,
-                                                             pre_authorization, domains, entered_captcha)
+                                                             pre_authorization, domains,
+                                                             entered_captcha)
         return None, None, None
     def reset_password(self, username: str, location: str='main',
                        fields: Optional[Dict[str, str]]=None, clear_on_submit: bool=False,

@@ -19,7 +19,7 @@ class CookieHandler:
     This class will execute all actions related to the re-authentication cookie, 
     including retrieving, deleting, and setting the cookie.
     """
-    def __init__(self, cookie_name: str, cookie_key: str, cookie_expiry_days: float=30.0):
+    def __init__(self, cookie_name: str, cookie_key: str, cookie_expiry_days: float):
         """
         Create a new instance of "CookieHandler".
 
@@ -83,7 +83,7 @@ class CookieHandler:
         str
             re-authentication cookie's expiry timestamp in Unix Epoch.
         """
-        return (datetime.utcnow() + timedelta(days=self.cookie_expiry_days)).timestamp()
+        return (datetime.now() + timedelta(days=self.cookie_expiry_days)).timestamp()
     def _token_decode(self) -> str:
         """
         Decodes the contents of the re-authentication cookie.

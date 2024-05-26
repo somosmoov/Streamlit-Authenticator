@@ -38,7 +38,7 @@ if not _RELEASE:
 
     # Creating a login widget
     try:
-        authenticator.login(max_concurrent_users=2)
+        authenticator.login()
     except LoginError as e:
         st.error(e)
 
@@ -59,7 +59,7 @@ if not _RELEASE:
         except (CredentialsError, ResetError) as e:
             st.error(e)
 
-    # # Creating a new user registration widget
+    # Creating a new user registration widget
     try:
         (email_of_registered_user,
          username_of_registered_user,
@@ -69,7 +69,7 @@ if not _RELEASE:
     except RegisterError as e:
         st.error(e)
 
-    # # Creating a forgot password widget
+    # Creating a forgot password widget
     try:
         (username_of_forgotten_password,
          email_of_forgotten_password,
@@ -82,7 +82,7 @@ if not _RELEASE:
     except ForgotError as e:
         st.error(e)
 
-    # # Creating a forgot username widget
+    # Creating a forgot username widget
     try:
         (username_of_forgotten_username,
          email_of_forgotten_username) = authenticator.forgot_username()
@@ -94,7 +94,7 @@ if not _RELEASE:
     except ForgotError as e:
         st.error(e)
 
-    # # Creating an update user details widget
+    # Creating an update user details widget
     if st.session_state['authentication_status']:
         try:
             if authenticator.update_user_details(st.session_state['username']):
