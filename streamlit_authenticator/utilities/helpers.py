@@ -21,6 +21,28 @@ class Helpers:
     def __init__(self):
         pass
     @classmethod
+    def check_captcha(cls, captcha_name: str, entered_captcha: str):
+        """
+        Checks the validity of the entered captcha.
+
+        Parameters
+        ----------
+        captcha_name: str
+            Name of the generated captcha stored in the session state.
+        entered_captcha: str, optional
+            User entered captcha to validate against the generated captcha.
+
+        Returns
+        -------
+        bool
+            Validity of entered captcha,
+            True: captcha is valid,
+            False: captcha is invalid.
+        """
+        if entered_captcha == st.session_state[captcha_name]:
+            return True
+        return False
+    @classmethod
     def generate_captcha(cls, captcha_name: str) -> ImageCaptcha:
         """
         Generates a captcha image and stores the associated captcha string in the

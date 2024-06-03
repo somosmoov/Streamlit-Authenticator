@@ -17,8 +17,8 @@ from utilities.helpers import Helpers
 from utilities.validator import Validator
 from utilities.exceptions import DeprecationError, LogoutError, ResetError, UpdateError
 
-from .cookie import CookieHandler
-from .authentication import AuthenticationHandler
+from controllers import CookieController
+from controllers import AuthenticationController
 
 class Authenticate:
     """
@@ -48,12 +48,12 @@ class Authenticate:
         validator: Validator, optional
             Validator object that checks the validity of the username, name, and email fields.
         """
-        self.authentication_handler     =   AuthenticationHandler(credentials,
-                                                                  pre_authorized,
-                                                                  validator)
-        self.cookie_handler             =   CookieHandler(cookie_name,
-                                                          cookie_key,
-                                                          cookie_expiry_days)
+        self.authentication_controller  =   AuthenticationController(credentials,
+                                                                     pre_authorized,
+                                                                     validator)
+        self.cookie_controller  =   CookieController(cookie_name,
+                                                     cookie_key,
+                                                     cookie_expiry_days)
     def forgot_password(self, location: str='main', fields: Optional[Dict[str, str]]=None,
                         captcha: bool=False, clear_on_submit: bool=False,
                         key: str='Forgot password', callback: Optional[Callable]=None) -> tuple:
@@ -92,12 +92,7 @@ class Authenticate:
             fields = {'Form name':'Forgot password', 'Username':'Username', 'Submit':'Submit',
                       'Captcha':'Captcha'}
         if location not in ['main', 'sidebar']:
-            # Temporary deprecation error to be displayed until a future release
-            raise DeprecationError("""Likely deprecation error, the 'form_name' parameter has been
-                                   replaced with the 'fields' parameter. For further information 
-                                   please refer to 
-                                   https://github.com/mkhorasani/Streamlit-Authenticator/tree/main?tab=readme-ov-file#authenticateforgot_password""")
-            # raise ValueError("Location must be one of 'main' or 'sidebar'")
+            raise ValueError("Location must be one of 'main' or 'sidebar'")
         if location == 'main':
             forgot_password_form = st.form(key=key, clear_on_submit=clear_on_submit)
         elif location == 'sidebar':
@@ -105,17 +100,16 @@ class Authenticate:
         forgot_password_form.subheader('Forget password' if 'Form name' not in fields
                                        else fields['Form name'])
         username = forgot_password_form.text_input('Username' if 'Username' not in fields
-                                                   else fields['Username']).lower().strip()
+                                                   else fields['Username'])
         entered_captcha = None
         if captcha:
             entered_captcha = forgot_password_form.text_input('Captcha' if 'Captcha' not in fields
-                                                              else fields['Captcha']).strip()
+                                                              else fields['Captcha'])
             forgot_password_form.image(Helpers.generate_captcha('forgot_password_captcha'))
         if forgot_password_form.form_submit_button('Submit' if 'Submit' not in fields
                                                    else fields['Submit']):
-            if callback:
-                callback({'username': username})
-            return self.authentication_handler.forgot_password(username, entered_captcha)
+            return self.authentication_controller.forgot_password(username, callback,
+                                                                  entered_captcha)
         return None, None, None
     def forgot_username(self, location: str='main', fields: Optional[Dict[str, str]]=None,
                         captcha: bool=False, clear_on_submit: bool=False,
@@ -153,12 +147,7 @@ class Authenticate:
             fields = {'Form name':'Forgot username', 'Email':'Email', 'Submit':'Submit',
                      'Captcha':'Captcha'}
         if location not in ['main', 'sidebar']:
-            # Temporary deprecation error to be displayed until a future release
-            raise DeprecationError("""Likely deprecation error, the 'form_name' parameter
-                                   has been replaced with the 'fields' parameter. For further
-                                   information please refer to 
-                                   https://github.com/mkhorasani/Streamlit-Authenticator/tree/main?tab=readme-ov-file#authenticateforgot_username""")
-            # raise ValueError("Location must be one of 'main' or 'sidebar'")
+            raise ValueError("Location must be one of 'main' or 'sidebar'")
         if location == 'main':
             forgot_username_form = st.form(key=key, clear_on_submit=clear_on_submit)
         elif location == 'sidebar':
@@ -166,17 +155,16 @@ class Authenticate:
         forgot_username_form.subheader('Forget username' if 'Form name' not in fields
                                        else fields['Form name'])
         email = forgot_username_form.text_input('Email' if 'Email' not in fields
-                                                else fields['Email']).strip()
+                                                else fields['Email'])
         entered_captcha = None
         if captcha:
             entered_captcha = forgot_username_form.text_input('Captcha' if 'Captcha' not in fields
-                                                              else fields['Captcha']).strip()
+                                                              else fields['Captcha'])
             forgot_username_form.image(Helpers.generate_captcha('forgot_username_captcha'))
         if forgot_username_form.form_submit_button('Submit' if 'Submit' not in fields
                                                    else fields['Submit']):
-            if callback:
-                callback({'email': email})
-            return self.authentication_handler.forgot_username(email, entered_captcha)
+            return self.authentication_controller.forgot_username(email, callback,
+                                                                  entered_captcha)
         return None, email
     def login(self, location: str='main', max_concurrent_users: Optional[int]=None,
               max_login_attempts: Optional[int]=None, fields: Optional[Dict[str, str]]=None,
@@ -224,16 +212,11 @@ class Authenticate:
             fields = {'Form name':'Login', 'Username':'Username', 'Password':'Password',
                       'Login':'Login', 'Captcha':'Captcha'}
         if location not in ['main', 'sidebar', 'unrendered']:
-            # Temporary deprecation error to be displayed until a future release
-            raise DeprecationError("""Likely deprecation error, the 'form_name' parameter has been
-                                   replaced with the 'fields' parameter. For further information please 
-                                   refer to 
-                                   https://github.com/mkhorasani/Streamlit-Authenticator/tree/main?tab=readme-ov-file#authenticatelogin""")
-            # raise ValueError("Location must be one of 'main' or 'sidebar' or 'unrendered'")
+            raise ValueError("Location must be one of 'main' or 'sidebar' or 'unrendered'")
         if not st.session_state['authentication_status']:
-            token = self.cookie_handler.get_cookie()
+            token = self.cookie_controller.get_cookie()
             if token:
-                self.authentication_handler.execute_login(token=token)
+                self.authentication_controller.execute_login(token=token)
             time.sleep(1)
             if not st.session_state['authentication_status']:
                 if location == 'main':
@@ -255,9 +238,10 @@ class Authenticate:
                     login_form.image(Helpers.generate_captcha('login_captcha'))
                 if login_form.form_submit_button('Login' if 'Login' not in fields
                                                  else fields['Login']):
-                    if self.authentication_handler.login(username, password, max_concurrent_users,
-                                                         max_login_attempts, entered_captcha):
-                        self.cookie_handler.set_cookie()
+                    if self.authentication_controller.login(username, password,
+                                                            max_concurrent_users,
+                                                            max_login_attempts, entered_captcha):
+                        self.cookie_controller.set_cookie()
                     if callback:
                         callback({'username': username})
         return (st.session_state['name'], st.session_state['authentication_status'],
@@ -284,20 +268,20 @@ class Authenticate:
             raise ValueError("Location must be one of 'main' or 'sidebar' or 'unrendered'")
         if location == 'main':
             if st.button(button_name, key=key):
-                self.authentication_handler.execute_logout()
-                self.cookie_handler.delete_cookie()
+                self.authentication_controller.logout()
+                self.cookie_controller.delete_cookie()
                 if callback:
                     callback({})
         elif location == 'sidebar':
             if st.sidebar.button(button_name, key=key):
-                self.authentication_handler.execute_logout()
-                self.cookie_handler.delete_cookie()
+                self.authentication_controller.logout()
+                self.cookie_controller.delete_cookie()
                 if callback:
                     callback({})
         elif location == 'unrendered':
             if st.session_state['authentication_status']:
-                self.authentication_handler.execute_logout()
-                self.cookie_handler.delete_cookie()
+                self.authentication_controller.logout()
+                self.cookie_controller.delete_cookie()
     def register_user(self, location: str='main', pre_authorization: bool=True,
                       domains: Optional[List[str]]=None, fields: Optional[Dict[str, str]]=None,
                       captcha: bool=True, clear_on_submit: bool=False, key: str='Register user',
@@ -345,16 +329,8 @@ class Authenticate:
             fields = {'Form name':'Register user', 'Email':'Email', 'Username':'Username',
                       'Password':'Password', 'Repeat password':'Repeat password',
                       'Register':'Register', 'Captcha':'Captcha'}
-        if pre_authorization:
-            if not self.authentication_handler.pre_authorized:
-                raise ValueError("pre-authorization argument must not be None")
         if location not in ['main', 'sidebar']:
-            # Temporary deprecation error to be displayed until a future release
-            raise DeprecationError("""Likely deprecation error, the 'form_name' parameter has
-                                   been replaced with the 'fields' parameter. For further
-                                   information please refer to 
-                                   https://github.com/mkhorasani/Streamlit-Authenticator/tree/main?tab=readme-ov-file#authenticateregister_user""")
-            # raise ValueError("Location must be one of 'main' or 'sidebar'")
+            raise ValueError("Location must be one of 'main' or 'sidebar'")
         if location == 'main':
             register_user_form = st.form(key=key, clear_on_submit=clear_on_submit)
         elif location == 'sidebar':
@@ -362,18 +338,18 @@ class Authenticate:
         register_user_form.subheader('Register user' if 'Form name' not in fields
                                      else fields['Form name'])
         new_name = register_user_form.text_input('Name' if 'Name' not in fields
-                                                 else fields['Name']).strip()
+                                                 else fields['Name'])
         new_email = register_user_form.text_input('Email' if 'Email' not in fields
-                                                  else fields['Email']).strip()
+                                                  else fields['Email'])
         new_username = register_user_form.text_input('Username' if 'Username' not in fields
-                                                     else fields['Username']).lower().strip()
+                                                     else fields['Username'])
         new_password = register_user_form.text_input('Password' if 'Password' not in fields
                                                      else fields['Password'],
-                                                     type='password').strip()
+                                                     type='password')
         new_password_repeat = register_user_form.text_input('Repeat password'
                                                             if 'Repeat password' not in fields
                                                             else fields['Repeat password'],
-                                                            type='password').strip()
+                                                            type='password')
         entered_captcha = None
         if captcha:
             entered_captcha = register_user_form.text_input('Captcha' if 'Captcha' not in fields
@@ -381,13 +357,10 @@ class Authenticate:
             register_user_form.image(Helpers.generate_captcha('register_user_captcha'))
         if register_user_form.form_submit_button('Register' if 'Register' not in fields
                                                  else fields['Register']):
-            if callback:
-                callback({'new_name': new_name, 'new_email': new_email,
-                          'new_username': new_username})
-            return self.authentication_handler.register_user(new_name, new_email, new_username,
-                                                             new_password, new_password_repeat,
-                                                             pre_authorization, domains,
-                                                             entered_captcha)
+            return self.authentication_controller.register_user(new_name, new_email, new_username,
+                                                                new_password, new_password_repeat,
+                                                                pre_authorization, domains,
+                                                                callback, entered_captcha)
         return None, None, None
     def reset_password(self, username: str, location: str='main',
                        fields: Optional[Dict[str, str]]=None, clear_on_submit: bool=False,
@@ -453,7 +426,7 @@ class Authenticate:
                                                   else fields['Reset']):
             if callback:
                 callback({})
-            if self.authentication_handler.reset_password(username, password, new_password,
+            if self.authentication_controller.reset_password(username, password, new_password,
                                                           new_password_repeat):
                 return True
         return None
@@ -520,6 +493,6 @@ class Authenticate:
                                                        else fields['Update']):
             if callback:
                 callback({'field': field, 'new_value': new_value})
-            if self.authentication_handler.update_user_details(new_value, username, field):
-                self.cookie_handler.set_cookie()
+            if self.authentication_controller.update_user_details(new_value, username, field):
+                self.cookie_controller.set_cookie()
                 return True

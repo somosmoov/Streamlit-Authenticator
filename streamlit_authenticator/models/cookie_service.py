@@ -14,10 +14,10 @@ from jwt import DecodeError, InvalidSignatureError
 import streamlit as st
 import extra_streamlit_components as stx
 
-class CookieHandler:
+class CookieService:
     """
     This class will execute all actions related to the re-authentication cookie, 
-    including retrieving, deleting, and setting the cookie.
+    including deleting, getting, and setting the cookie.
     """
     def __init__(self, cookie_name: str, cookie_key: str, cookie_expiry_days: float):
         """
@@ -39,9 +39,17 @@ class CookieHandler:
         self.cookie_manager         =   stx.CookieManager()
         self.token                  =   None
         self.exp_date               =   None
+    def delete_cookie(self):
+        """
+        Deletes the re-authentication cookie.
+        """
+        try:
+            self.cookie_manager.delete(self.cookie_name)
+        except KeyError as e:
+            print(e)
     def get_cookie(self) -> str:
         """
-        Retrieves, checks, and then returns the re-authentication cookie.
+        Gets, checks, and then returns the re-authentication cookie.
 
         Returns
         -------
@@ -57,14 +65,6 @@ class CookieHandler:
                 self.token['exp_date'] > datetime.now().timestamp()):
                 return self.token
         return None
-    def delete_cookie(self):
-        """
-        Deletes the re-authentication cookie.
-        """
-        try:
-            self.cookie_manager.delete(self.cookie_name)
-        except KeyError as e:
-            print(e)
     def set_cookie(self):
         """
         Sets the re-authentication cookie.

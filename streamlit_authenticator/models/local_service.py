@@ -7,7 +7,7 @@ Libraries imported:
 - typing: Module implementing standard typing notations for Python functions.
 """
 
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 import streamlit as st
 
 from utilities.hasher import Hasher
@@ -20,7 +20,7 @@ from utilities.exceptions import (CredentialsError,
                                   ResetError,
                                   UpdateError)
 
-class AuthenticationHandler:
+class LocalService:
     """
     This class will execute the logic for the login, logout, register user, reset password, 
     forgot password, forgot username, and modify user details widgets.
@@ -163,7 +163,7 @@ class AuthenticationHandler:
         username: str, optional
             The username of the user being logged in.
         token: dict, optional
-            The re-authentication cookie to retrieve the username from.
+            The re-authentication cookie to get the username from.
         """
         if username:
             st.session_state['username'] = username
@@ -178,16 +178,16 @@ class AuthenticationHandler:
             st.session_state['name'] = self.credentials['usernames'][token['username']]['name']
             st.session_state['authentication_status'] = True
             self.credentials['usernames'][token['username']]['logged_in'] = True
-    def execute_logout(self):
+    def logout(self):
         """
-        Clears cookie and session state variables associated with the logged in user.
+        Clears the cookie and session state variables associated with the logged in user.
         """
         self.credentials['usernames'][st.session_state['username']]['logged_in'] = False
         st.session_state['logout'] = True
         st.session_state['name'] = None
         st.session_state['username'] = None
         st.session_state['authentication_status'] = None
-    def forgot_password(self, username: str, entered_captcha: Optional[str]=None) -> tuple:
+    def forgot_password(self, username: str, callback: Optional[Callable]=None) -> tuple:
         """
         Creates a new random password for the user.
 
@@ -195,45 +195,48 @@ class AuthenticationHandler:
         ----------
         username: str
             Username associated with the forgotten password.
-        entered_captcha: str, optional
-          User entered captcha to validate against the generated captcha.
+        callback: callable, optional
+            Optional callback function that will be invoked on form submission.
 
         Returns
         -------
-        tuple
-            Username of the user; email of the user; new random password of the user.
+        str
+            Username of the user. 
+        str
+            Email of the user.
+        str
+            New random password of the user.
         """
-        self._check_captcha('forgot_password_captcha', entered_captcha)
-        if not self.validator.validate_length(username, 1):
-            raise ForgotError('Username not provided')
         if username in self.credentials['usernames']:
-            return (username, self.credentials['usernames'][username]['email'],
+            if callback:
+                callback({'username': username})
+            return (username, self._get_credentials()[username]['email'],
                     self._set_random_password(username))
-        else:
-            return False, None, None
-    def forgot_username(self, email: str, entered_captcha: Optional[str]=None) -> tuple:
+        return False, None, None
+    def forgot_username(self, email: str, callback: Optional[Callable]=None) -> tuple:
         """
-        Retrieves the forgotten username of a user.
+        Gets the forgotten username of a user.
 
         Parameters
         ----------
         email: str
             Email associated with the forgotten username.
-        entered_captcha: str, optional
-          User entered captcha to validate against the generated captcha.
+        callback: callable, optional
+            Optional callback function that will be invoked on form submission.
 
         Returns
         -------
-        tuple
-            Username of the user; email of the user.
+        str
+            Username of the user.
+        str
+            Email of the user.
         """
-        self._check_captcha('forgot_username_captcha', entered_captcha)
-        if not self.validator.validate_length(email, 1):
-            raise ForgotError('Email not provided')
+        if callback:
+            callback({'email': email})
         return self._get_username('email', email), email
     def _get_username(self, key: str, value: str) -> str:
         """
-        Retrieves the username based on a provided entry.
+        Gets the username based on a provided entry.
 
         Parameters
         ----------
@@ -251,6 +254,16 @@ class AuthenticationHandler:
             if values[key] == value:
                 return username
         return False
+    def _get_credentials(self) -> dict:
+        """
+        Gets the user credentials dictionary.
+
+        Returns
+        -------
+        dict
+            User credentials dictionary.
+        """
+        return self.credentials['usernames']
     def _record_failed_login_attempts(self, username: str, reset: bool=False):
         """
         Records the number of failed login attempts for a given username.
@@ -285,11 +298,10 @@ class AuthenticationHandler:
             {'name': name, 'password': Hasher([password]).generate()[0], 'email': email,
              'logged_in': False}
     def register_user(self, new_name: str, new_email: str, new_username: str,
-                      new_password: str, new_password_repeat: str, pre_authorization: bool,
-                      domains: Optional[List[str]]=None,
-                      entered_captcha: Optional[str]=None) -> tuple:
+                      new_password: str, pre_authorization: bool,
+                      callback: Optional[Callable]=None) -> tuple:
         """
-        Validates a new user's name, username, password, and email.
+        Registers a new user's name, username, password, and email.
 
         Parameters
         ----------
@@ -301,45 +313,29 @@ class AuthenticationHandler:
             Username of the new user.
         new_password: str
             Password of the new user.
-        new_password_repeat: str
-            Repeated password of the new user.
         pre-authorization: bool
             Pre-authorization requirement, 
             True: user must be pre-authorized to register, 
             False: any user can register.
-        domains: list, optional
-            Required list of domains a new email must belong to i.e. ['gmail.com', 'yahoo.com'], 
-            list: the required list of domains, 
-            None: any domain is allowed.
-        entered_captcha: str, optional
-            User entered captcha to validate against the generated captcha.
+        callback: callable, optional
+            Optional callback function that will be invoked on form submission.
 
         Returns
         -------
-        tuple
-            Email of the new user; username of the new user; name of the new user.
+        str
+            Email of the new user.
+        str
+            Username of the new user.
+        str
+            Name of the new user.
         """
-        if not self.validator.validate_name(new_name):
-            raise RegisterError('Name is not valid')
-        if not self.validator.validate_email(new_email):
-            raise RegisterError('Email is not valid')
         if self._credentials_contains_value(new_email):
             raise RegisterError('Email already taken')
-        if domains:
-            if new_email.split('@')[1] not in ' '.join(domains):
-                raise RegisterError('Email not allowed to register')
-        if not self.validator.validate_username(new_username):
-            raise RegisterError('Username is not valid')
         if new_username in self.credentials['usernames']:
             raise RegisterError('Username already taken')
-        if not self.validator.validate_length(new_password, 1) \
-            or not self.validator.validate_length(new_password_repeat, 1):
-            raise RegisterError('Password/repeat password fields cannot be empty')
-        if new_password != new_password_repeat:
-            raise RegisterError('Passwords do not match')
-        if not self.validator.validate_password(new_password):
-            raise RegisterError('Password does not meet criteria')
-        self._check_captcha('register_user_captcha', entered_captcha)
+        if callback:
+            callback({'new_name': new_name, 'new_email': new_email,
+                      'new_username': new_username})
         if pre_authorization:
             if new_email in self.pre_authorized['emails']:
                 self._register_credentials(new_username, new_name, new_password, new_email)
@@ -348,42 +344,6 @@ class AuthenticationHandler:
             raise RegisterError('User not pre-authorized to register')
         self._register_credentials(new_username, new_name, new_password, new_email)
         return new_email, new_username, new_name
-    def reset_password(self, username: str, password: str, new_password: str,
-                       new_password_repeat: str) -> bool:
-        """
-        Validates the user's current password and subsequently saves their new password to the 
-        credentials dictionary.
-
-        Parameters
-        ----------
-        username: str
-            Username of the user.
-        password: str
-            Current password of the user.
-        new_password: str
-            New password of the user.
-        new_password_repeat: str
-            Repeated new password of the user.
-
-        Returns
-        -------
-        bool
-            State of resetting the password, 
-            True: password reset successfully.
-        """
-        if not self.check_credentials(username, password):
-            raise CredentialsError('password')
-        if not self.validator.validate_length(new_password, 1):
-            raise ResetError('No new password provided')
-        if new_password != new_password_repeat:
-            raise ResetError('Passwords do not match')
-        if password == new_password:
-            raise ResetError('New and current passwords are the same')
-        if not self.validator.validate_password(new_password):
-            raise ResetError('Password does not meet criteria')
-        self._update_password(username, new_password)
-        self._record_failed_login_attempts(username, reset=True)
-        return True
     def _set_random_password(self, username: str) -> str:
         """
         Updates the credentials dictionary with the user's hashed random password.
@@ -428,38 +388,3 @@ class AuthenticationHandler:
             Updated plain text password.
         """
         self.credentials['usernames'][username]['password'] = Hasher([password]).generate()[0]
-    def update_user_details(self, new_value: str, username: str, field: str) -> bool:
-        """
-        Validates the user's updated name or email and subsequently modifies it in the
-        credentials dictionary.
-
-        Parameters
-        ----------
-        new_value: str
-            New value for the name or email.
-        username: str
-            Username of the user.
-        field: str
-            Field to update i.e. name or email.
-
-        Returns
-        -------
-        bool
-            State of updating the user's detail, 
-            True: details updated successfully.
-        """
-        if field == 'name':
-            if not self.validator.validate_name(new_value):
-                raise UpdateError('Name is not valid')
-        if field == 'email':
-            if not self.validator.validate_email(new_value):
-                raise UpdateError('Email is not valid')
-            if self._credentials_contains_value(new_value):
-                raise UpdateError('Email already taken')
-        if new_value != self.credentials['usernames'][username][field]:
-            self._update_entry(username, field, new_value)
-            if field == 'name':
-                st.session_state['name'] = new_value
-            return True
-        else:
-            raise UpdateError('New and current values are the same')
