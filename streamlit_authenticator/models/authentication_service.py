@@ -20,7 +20,7 @@ from utilities.exceptions import (CredentialsError,
                                   ResetError,
                                   UpdateError)
 
-class LocalService:
+class AuthenticationService:
     """
     This class will execute the logic for the login, logout, register user, reset password, 
     forgot password, forgot username, and modify user details widgets.
@@ -65,25 +65,9 @@ class LocalService:
             st.session_state['username'] = None
         if 'logout' not in st.session_state:
             st.session_state['logout'] = None
-    def _check_captcha(self, captcha_name: str, entered_captcha: Optional[str]=None):
-        """
-        Checks the validity of the entered captcha.
-
-        Parameters
-        ----------
-        captcha_name: str
-            Name of the generated captcha stored in the session state.
-        entered_captcha: str, optional
-            User entered captcha to validate against the generated captcha.
-        """
-        if entered_captcha or entered_captcha == '':
-            if entered_captcha != st.session_state[captcha_name]:
-                raise RegisterError('Captcha entered incorrectly')
-            del st.session_state[captcha_name]
     def check_credentials(self, username: str, password: str,
                           max_concurrent_users: Optional[int]=None,
-                          max_login_attempts: Optional[int]=None,
-                          entered_captcha: Optional[str]=None) -> bool:
+                          max_login_attempts: Optional[int]=None) -> bool:
         """
         Checks the validity of the entered credentials.
 
@@ -97,15 +81,15 @@ class LocalService:
             Maximum number of users allowed to login concurrently.
         max_login_attempts: int, optional
             Maximum number of failed login attempts a user can make.
-        entered_captcha: str, optional
-            User entered captcha to validate against the generated captcha.
 
         Returns
         -------
         bool
-            Validity of the entered credentials.
+            Validity of entered credentials,
+            None: no credentials entered, 
+            True: correct credentials,
+            False: incorrect credentials.
         """
-        self._check_captcha('login_captcha', entered_captcha)
         if isinstance(max_concurrent_users, int) and self._count_concurrent_users() > \
             max_concurrent_users - 1:
             raise LoginError('Maximum number of concurrent users exceeded')
@@ -121,7 +105,7 @@ class LocalService:
             return False
         except (TypeError, ValueError) as e:
             print(e)
-        return False
+        return None
     def _count_concurrent_users(self) -> int:
         """
         Counts the number of users logged in concurrently.
@@ -153,31 +137,56 @@ class LocalService:
             False value absent.
         """
         return any(value in d.values() for d in self.credentials['usernames'].values())
-    def execute_login(self, username: Optional[str]=None, token: Optional[Dict[str, str]]=None):
+    def login(self, username: str, password: str, max_concurrent_users: Optional[int]=None,
+              max_login_attempts: Optional[int]=None, token: Optional[Dict[str, str]]=None,
+              callback: Optional[Callable]=None) -> bool:
         """
         Executes login by setting authentication status to true and adding the user's
         username and name to the session state.
 
         Parameters
         ----------
-        username: str, optional
-            The username of the user being logged in.
+        username: str
+            The entered username.
+        password: str
+            The entered password.
+        max_concurrent_users: int, optional
+            Maximum number of users allowed to login concurrently.
+        max_login_attempts: int, optional
+            Maximum number of failed login attempts a user can make.
         token: dict, optional
             The re-authentication cookie to get the username from.
+        callback: callable, optional
+            Optional callback function that will be invoked on form submission.
+
+        Returns
+        -------
+        bool
+            Status of authentication, 
+            None: no credentials entered, 
+            True: correct credentials, 
+            False: incorrect credentials.
         """
         if username:
-            st.session_state['username'] = username
-            st.session_state['name'] = self.credentials['usernames'][username]['name']
-            st.session_state['authentication_status'] = True
-            self._record_failed_login_attempts(username, reset=True)
-            self.credentials['usernames'][username]['logged_in'] = True
-        elif token:
+            if self.check_credentials(username, password, max_concurrent_users, max_login_attempts):
+                st.session_state['username'] = username
+                st.session_state['name'] = self.credentials['usernames'][username]['name']
+                st.session_state['authentication_status'] = True
+                self._record_failed_login_attempts(username, reset=True)
+                self.credentials['usernames'][username]['logged_in'] = True
+                if callback:
+                    callback({'username': username})
+                return True
+            st.session_state['authentication_status'] = False
+            return False
+        if token:
             if not token['username'] in self.credentials['usernames']:
                 raise LoginError('User not authorized')
             st.session_state['username'] = token['username']
             st.session_state['name'] = self.credentials['usernames'][token['username']]['name']
             st.session_state['authentication_status'] = True
             self.credentials['usernames'][token['username']]['logged_in'] = True
+        return None
     def logout(self):
         """
         Clears the cookie and session state variables associated with the logged in user.

@@ -109,7 +109,7 @@ class Authenticate:
         if forgot_password_form.form_submit_button('Submit' if 'Submit' not in fields
                                                    else fields['Submit']):
             return self.authentication_controller.forgot_password(username, callback,
-                                                                  entered_captcha)
+                                                                  captcha, entered_captcha)
         return None, None, None
     def forgot_username(self, location: str='main', fields: Optional[Dict[str, str]]=None,
                         captcha: bool=False, clear_on_submit: bool=False,
@@ -164,7 +164,7 @@ class Authenticate:
         if forgot_username_form.form_submit_button('Submit' if 'Submit' not in fields
                                                    else fields['Submit']):
             return self.authentication_controller.forgot_username(email, callback,
-                                                                  entered_captcha)
+                                                                  captcha, entered_captcha)
         return None, email
     def login(self, location: str='main', max_concurrent_users: Optional[int]=None,
               max_login_attempts: Optional[int]=None, fields: Optional[Dict[str, str]]=None,
@@ -216,7 +216,7 @@ class Authenticate:
         if not st.session_state['authentication_status']:
             token = self.cookie_controller.get_cookie()
             if token:
-                self.authentication_controller.execute_login(token=token)
+                self.authentication_controller.login(token=token)
             time.sleep(1)
             if not st.session_state['authentication_status']:
                 if location == 'main':
@@ -228,22 +228,22 @@ class Authenticate:
                         st.session_state['username'])
                 login_form.subheader('Login' if 'Form name' not in fields else fields['Form name'])
                 username = login_form.text_input('Username' if 'Username' not in fields
-                                                 else fields['Username']).lower().strip()
+                                                 else fields['Username'])
                 password = login_form.text_input('Password' if 'Password' not in fields
-                                                 else fields['Password'], type='password').strip()
+                                                 else fields['Password'], type='password')
                 entered_captcha = None
                 if captcha:
                     entered_captcha = login_form.text_input('Captcha' if 'Captcha' not in fields
-                                                            else fields['Captcha']).strip()
+                                                            else fields['Captcha'])
                     login_form.image(Helpers.generate_captcha('login_captcha'))
                 if login_form.form_submit_button('Login' if 'Login' not in fields
                                                  else fields['Login']):
                     if self.authentication_controller.login(username, password,
                                                             max_concurrent_users,
-                                                            max_login_attempts, entered_captcha):
+                                                            max_login_attempts,
+                                                            callback, captcha=captcha,
+                                                            entered_captcha=entered_captcha):
                         self.cookie_controller.set_cookie()
-                    if callback:
-                        callback({'username': username})
         return (st.session_state['name'], st.session_state['authentication_status'],
                 st.session_state['username'])
     def logout(self, button_name: str='Logout', location: str='main', key: str='Logout',
@@ -360,7 +360,7 @@ class Authenticate:
             return self.authentication_controller.register_user(new_name, new_email, new_username,
                                                                 new_password, new_password_repeat,
                                                                 pre_authorization, domains,
-                                                                callback, entered_captcha)
+                                                                callback, captcha, entered_captcha)
         return None, None, None
     def reset_password(self, username: str, location: str='main',
                        fields: Optional[Dict[str, str]]=None, clear_on_submit: bool=False,

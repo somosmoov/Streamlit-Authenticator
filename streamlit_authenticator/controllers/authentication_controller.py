@@ -10,7 +10,7 @@ Libraries imported:
 from typing import Callable, Dict, List, Optional
 import streamlit as st
 
-from models import LocalService
+from models import AuthenticationService
 
 from utilities.hasher import Hasher
 from utilities.validator import Validator
@@ -41,9 +41,9 @@ class AuthenticationController:
         validator: Validator, optional
             Validator object that checks the validity of the username, name, and email fields.
         """
-        self.authentication_service = LocalService(credentials,
-                                                   pre_authorized,
-                                                   validator)
+        self.authentication_service = AuthenticationService(credentials,
+                                                            pre_authorized,
+                                                            validator)
         self.validator = Validator()
     def _check_captcha(self, captcha_name: str, exception: Exception, entered_captcha: str):
         """
@@ -63,7 +63,7 @@ class AuthenticationController:
         else:
             raise exception('Captcha entered incorrectly')
     def forgot_password(self, username: str, callback: Optional[Callable]=None,
-                        entered_captcha: Optional[str]=None) -> tuple:
+                        captcha: bool=False, entered_captcha: Optional[str]=None) -> tuple:
         """
         Controls the request to create a new random password for the user.
 
@@ -73,6 +73,10 @@ class AuthenticationController:
             Username associated with the forgotten password.
         callback: callable, optional
             Optional callback function that will be invoked on form submission.
+        captcha: bool
+            Captcha requirement for the login widget, 
+            True: captcha required,
+            False: captcha removed.
         entered_captcha: str, optional
             User entered captcha to validate against the generated captcha.
 
@@ -86,13 +90,16 @@ class AuthenticationController:
             New random password of the user.
         """
         username = username.lower().strip()
-        entered_captcha = entered_captcha.strip()
-        self._check_captcha('forgot_password_captcha', ForgotError, entered_captcha)
+        if captcha:
+            if not entered_captcha:
+                raise ForgotError('Captcha not entered')
+            entered_captcha = entered_captcha.strip()
+            self._check_captcha('forgot_password_captcha', ForgotError, entered_captcha)
         if not self.validator.validate_length(username, 1):
             raise ForgotError('Username not provided')
         return self.authentication_service.forgot_password(username, callback)
     def forgot_username(self, email: str, callback: Optional[Callable]=None,
-                        entered_captcha: Optional[str]=None) -> tuple:
+                        captcha: bool=False, entered_captcha: Optional[str]=None) -> tuple:
         """
         Controls the request to get the forgotten username of a user.
 
@@ -102,6 +109,10 @@ class AuthenticationController:
             Email associated with the forgotten username.
         callback: callable, optional
             Optional callback function that will be invoked on form submission.
+        captcha: bool
+            Captcha requirement for the login widget, 
+            True: captcha required,
+            False: captcha removed.
         entered_captcha: str, optional
             User entered captcha to validate against the generated captcha.
 
@@ -113,12 +124,56 @@ class AuthenticationController:
             Email of the user.
         """
         email = email.strip()
-        entered_captcha = entered_captcha.strip()
-        self._check_captcha('forgot_username_captcha', ForgotError, entered_captcha)
+        if captcha:
+            if not entered_captcha:
+                raise ForgotError('Captcha not entered')
+            entered_captcha = entered_captcha.strip()
+            self._check_captcha('forgot_username_captcha', ForgotError, entered_captcha)
         if not self.validator.validate_length(email, 1):
             raise ForgotError('Email not provided')
         return self.authentication_service.forgot_username(email, callback)
-    #def login(self) -> 
+    def login(self, username: Optional[str]=None, password: Optional[str]=None,
+              max_concurrent_users: Optional[int]=None, max_login_attempts: Optional[int]=None,
+              token: Optional[Dict[str, str]]=None, callback: Optional[Callable]=None,
+              captcha: bool=False, entered_captcha: Optional[str]=None):
+        """
+        Controls the request to login a user.
+
+        Parameters
+        ----------
+        username: str, optional
+            The username of the user being logged in.
+        max_concurrent_users: int, optional
+            Maximum number of users allowed to login concurrently.
+        max_login_attempts: int, optional
+            Maximum number of failed login attempts a user can make.
+        callback: callable, optional
+            Optional callback function that will be invoked on form submission.
+        captcha: bool
+            Captcha requirement for the login widget, 
+            True: captcha required,
+            False: captcha removed.
+        entered_captcha: str, optional
+            User entered captcha to validate against the generated captcha.
+
+        Returns
+        -------
+        bool
+            Status of authentication, 
+            None: no credentials entered, 
+            True: correct credentials, 
+            False: incorrect credentials.
+        """
+        if username and password:
+            username = username.lower().strip()
+            password = password.strip()
+        if captcha:
+            if not entered_captcha:
+                raise LoginError('Captcha not entered')
+            entered_captcha = entered_captcha.strip()
+            self._check_captcha('login_captcha', LoginError, entered_captcha)
+        return self.authentication_service.login(username, password, max_concurrent_users,
+                                                 max_login_attempts, token, callback)
     def logout(self):
         """
         Controls the request to logout a user.
@@ -128,7 +183,7 @@ class AuthenticationController:
     def register_user(self, new_name: str, new_email: str, new_username: str,
                       new_password: str, new_password_repeat: str, pre_authorization: bool,
                       domains: Optional[List[str]]=None, callback: Optional[Callable]=None,
-                      entered_captcha: Optional[str]=None) -> tuple:
+                      captcha: bool=False, entered_captcha: Optional[str]=None) -> tuple:
         """
         Controls the request to register a new user's name, username, password, and email.
 
@@ -154,6 +209,10 @@ class AuthenticationController:
             None: any domain is allowed.
         callback: callable, optional
             Optional callback function that will be invoked on form submission.
+        captcha: bool
+            Captcha requirement for the login widget, 
+            True: captcha required,
+            False: captcha removed.
         entered_captcha: str, optional
             User entered captcha to validate against the generated captcha.
 
@@ -190,8 +249,11 @@ class AuthenticationController:
         if pre_authorization:
             if not self.authentication_service.pre_authorized:
                 raise RegisterError('Pre-authorization argument must not be None')
-        entered_captcha = entered_captcha.strip()
-        self._check_captcha('register_user_captcha', RegisterError, entered_captcha)
+        if captcha:
+            if not entered_captcha:
+                raise RegisterError('Captcha not entered')
+            entered_captcha = entered_captcha.strip()
+            self._check_captcha('register_user_captcha', RegisterError, entered_captcha)
         return self.authentication_service.register_user(new_name, new_email, new_username,
                                                          new_password, pre_authorization,
                                                          callback)
