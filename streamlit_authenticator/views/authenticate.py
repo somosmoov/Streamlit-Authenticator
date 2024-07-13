@@ -397,12 +397,7 @@ class Authenticate:
                       'New password':'New password','Repeat password':'Repeat password',
                       'Reset':'Reset'}
         if location not in ['main', 'sidebar']:
-            # Temporary deprecation error to be displayed until a future release
-            raise DeprecationError("""Likely deprecation error, the 'form_name' parameter has
-                                   been replaced with the 'fields' parameter. For further
-                                   information please refer to 
-                                   https://github.com/mkhorasani/Streamlit-Authenticator/tree/main?tab=readme-ov-file#authenticatereset_password""")
-            # raise ValueError("Location must be one of 'main' or 'sidebar'")
+            raise ValueError("Location must be one of 'main' or 'sidebar'")
         if location == 'main':
             reset_password_form = st.form(key=key, clear_on_submit=clear_on_submit)
         elif location == 'sidebar':
@@ -424,10 +419,8 @@ class Authenticate:
                                                              type='password').strip()
         if reset_password_form.form_submit_button('Reset' if 'Reset' not in fields
                                                   else fields['Reset']):
-            if callback:
-                callback({})
             if self.authentication_controller.reset_password(username, password, new_password,
-                                                          new_password_repeat):
+                                                          new_password_repeat, callback):
                 return True
         return None
     def update_user_details(self, username: str, location: str='main',
@@ -465,12 +458,7 @@ class Authenticate:
             fields = {'Form name':'Update user details', 'Field':'Field', 'Name':'Name',
                       'Email':'Email', 'New value':'New value', 'Update':'Update'} 
         if location not in ['main', 'sidebar']:
-            # Temporary deprecation error to be displayed until a future release
-            raise DeprecationError("""Likely deprecation error, the 'form_name' parameter
-                                   has been replaced with the 'fields' parameter. For further
-                                   information please refer to 
-                                   https://github.com/mkhorasani/Streamlit-Authenticator/tree/main?tab=readme-ov-file#authenticateupdate_user_details""")
-            # raise ValueError("Location must be one of 'main' or 'sidebar'")
+            raise ValueError("Location must be one of 'main' or 'sidebar'")
         if location == 'main':
             update_user_details_form = st.form(key=key, clear_on_submit=clear_on_submit)
         elif location == 'sidebar':
@@ -491,8 +479,7 @@ class Authenticate:
             field = 'email'
         if update_user_details_form.form_submit_button('Update' if 'Update' not in fields
                                                        else fields['Update']):
-            if callback:
-                callback({'field': field, 'new_value': new_value})
-            if self.authentication_controller.update_user_details(new_value, username, field):
+            if self.authentication_controller.update_user_details(new_value, username, field,
+                                                                  callback):
                 self.cookie_controller.set_cookie()
                 return True

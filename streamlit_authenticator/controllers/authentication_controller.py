@@ -101,7 +101,7 @@ class AuthenticationController:
     def forgot_username(self, email: str, callback: Optional[Callable]=None,
                         captcha: bool=False, entered_captcha: Optional[str]=None) -> tuple:
         """
-        Controls the request to get the forgotten username of a user.
+        Controls the request to get the forgotten username of the user.
 
         Parameters
         ----------
@@ -137,7 +137,7 @@ class AuthenticationController:
               token: Optional[Dict[str, str]]=None, callback: Optional[Callable]=None,
               captcha: bool=False, entered_captcha: Optional[str]=None):
         """
-        Controls the request to login a user.
+        Controls the request to login the user.
 
         Parameters
         ----------
@@ -176,7 +176,7 @@ class AuthenticationController:
                                                  max_login_attempts, token, callback)
     def logout(self):
         """
-        Controls the request to logout a user.
+        Controls the request to logout the user.
 
         """
         self.authentication_service.logout()
@@ -185,7 +185,7 @@ class AuthenticationController:
                       domains: Optional[List[str]]=None, callback: Optional[Callable]=None,
                       captcha: bool=False, entered_captcha: Optional[str]=None) -> tuple:
         """
-        Controls the request to register a new user's name, username, password, and email.
+        Controls the request to register the new user's name, username, password, and email.
 
         Parameters
         ----------
@@ -258,10 +258,9 @@ class AuthenticationController:
                                                          new_password, pre_authorization,
                                                          callback)
     def reset_password(self, username: str, password: str, new_password: str,
-                       new_password_repeat: str) -> bool:
+                       new_password_repeat: str, callback: Optional[Callable]=None) -> bool:
         """
-        Validates the user's current password and subsequently saves their new password to the 
-        credentials dictionary.
+        Controls the request to reset the user's password.
 
         Parameters
         ----------
@@ -273,6 +272,8 @@ class AuthenticationController:
             New password of the user.
         new_password_repeat: str
             Repeated new password of the user.
+        callback: callable, optional
+            Optional callback function that will be invoked on form submission.
 
         Returns
         -------
@@ -280,8 +281,6 @@ class AuthenticationController:
             State of resetting the password, 
             True: password reset successfully.
         """
-        if not self.check_credentials(username, password):
-            raise CredentialsError('password')
         if not self.validator.validate_length(new_password, 1):
             raise ResetError('No new password provided')
         if new_password != new_password_repeat:
@@ -290,13 +289,12 @@ class AuthenticationController:
             raise ResetError('New and current passwords are the same')
         if not self.validator.validate_password(new_password):
             raise ResetError('Password does not meet criteria')
-        self._update_password(username, new_password)
-        self._record_failed_login_attempts(username, reset=True)
-        return True
-    def update_user_details(self, new_value: str, username: str, field: str) -> bool:
+        return self.authentication_service.reset_password(username, password, new_password,
+                                                          callback)
+    def update_user_details(self, new_value: str, username: str, field: str,
+                            callback: Optional[Callable]=None) -> bool:
         """
-        Validates the user's updated name or email and subsequently modifies it in the
-        credentials dictionary.
+        Controls the request to update the user's name or email.
 
         Parameters
         ----------
@@ -306,6 +304,8 @@ class AuthenticationController:
             Username of the user.
         field: str
             Field to update i.e. name or email.
+        callback: callable, optional
+            Optional callback function that will be invoked on form submission.
 
         Returns
         -------
@@ -319,12 +319,5 @@ class AuthenticationController:
         if field == 'email':
             if not self.validator.validate_email(new_value):
                 raise UpdateError('Email is not valid')
-            if self._credentials_contains_value(new_value):
-                raise UpdateError('Email already taken')
-        if new_value != self.credentials['usernames'][username][field]:
-            self._update_entry(username, field, new_value)
-            if field == 'name':
-                st.session_state['name'] = new_value
-            return True
-        else:
-            raise UpdateError('New and current values are the same')
+        return self.authentication_service.update_user_details(new_value, username, field,
+                                                               callback)

@@ -353,6 +353,36 @@ class AuthenticationService:
             raise RegisterError('User not pre-authorized to register')
         self._register_credentials(new_username, new_name, new_password, new_email)
         return new_email, new_username, new_name
+    def reset_password(self, username: str, password: str, new_password: str,
+                       callback: Optional[Callable]=None) -> bool:
+        """
+        Validates the user's current password and subsequently saves their new password to the 
+        credentials dictionary.
+
+        Parameters
+        ----------
+        username: str
+            Username of the user.
+        password: str
+            Current password of the user.
+        new_password: str
+            New password of the user.
+        callback: callable, optional
+            Optional callback function that will be invoked on form submission.
+
+        Returns
+        -------
+        bool
+            State of resetting the password, 
+            True: password reset successfully.
+        """
+        if not self.check_credentials(username, password):
+            raise CredentialsError('password')
+        self._update_password(username, new_password)
+        self._record_failed_login_attempts(username, reset=True)
+        if callback:
+            callback({})
+        return True
     def _set_random_password(self, username: str) -> str:
         """
         Updates the credentials dictionary with the user's hashed random password.
@@ -397,3 +427,37 @@ class AuthenticationService:
             Updated plain text password.
         """
         self.credentials['usernames'][username]['password'] = Hasher([password]).generate()[0]
+    def update_user_details(self, new_value: str, username: str, field: str,
+                            callback: Optional[Callable]=None) -> bool:
+        """
+        Validates the user's updated name or email and subsequently modifies it in the
+        credentials dictionary.
+
+        Parameters
+        ----------
+        new_value: str
+            New value for the name or email.
+        username: str
+            Username of the user.
+        field: str
+            Field to update i.e. name or email.
+        callback: callable, optional
+            Optional callback function that will be invoked on form submission.
+
+        Returns
+        -------
+        bool
+            State of updating the user's detail, 
+            True: details updated successfully.
+        """
+        if field == 'email':
+            if self._credentials_contains_value(new_value):
+                raise UpdateError('Email already taken')
+        if new_value != self.credentials['usernames'][username][field]:
+            self._update_entry(username, field, new_value)
+            if field == 'name':
+                st.session_state['name'] = new_value
+            if callback:
+                callback({'field': field, 'new_value': new_value})
+            return True
+        raise UpdateError('New and current values are the same')
