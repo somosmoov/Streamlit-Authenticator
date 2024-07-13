@@ -48,7 +48,8 @@ class Validator:
         bool
             Validity of entered variable.
         """
-        return min_length <= len(variable) <= max_length
+        pattern = rf"^.{{{min_length},{max_length}}}$"
+        return bool(re.match(pattern, variable))
     def validate_name(self, name: str) -> bool:
         """
         Checks the validity of the entered name.
@@ -63,7 +64,8 @@ class Validator:
         bool
             Validity of entered name.
         """
-        return 1 <= len(name) <= 100
+        pattern = r"^.{1,100}$"
+        return bool(re.match(pattern, name))
     def validate_password(self, password: str) -> bool:
         """
         Checks the validity of the entered password.
@@ -94,6 +96,5 @@ class Validator:
         bool
             Validity of entered username.
         """
-        pattern = r"^[a-zA-Z0-9_-]{1,20}$"
+        pattern = r"^([a-zA-Z0-9_-]{1,20}|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$"
         return bool(re.match(pattern, username))
-    
