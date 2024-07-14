@@ -45,13 +45,13 @@ credentials:
       failed_login_attempts: 0 # Will be managed automatically
       logged_in: False # Will be managed automatically
       name: John Smith
-      password: abc # Will be hashed automatically
+      password: abc # Can be hashed automatically (please see below)
     rbriggs:
       email: rbriggs@gmail.com
       failed_login_attempts: 0 # Will be managed automatically
       logged_in: False # Will be managed automatically
       name: Rebecca Briggs
-      password: def # Will be hashed automatically
+      password: def # Can be hashed automatically (please see below)
 cookie:
   expiry_days: 30
   key: some_signature_key # Must be string
