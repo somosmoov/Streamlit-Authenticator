@@ -28,7 +28,7 @@ class AuthenticationController:
     forgot password, forgot username, and modify user details widgets.
     """
     def __init__(self, credentials: dict, pre_authorized: Optional[List[str]]=None,
-                 validator: Optional[Validator]=None):
+                 validator: Optional[Validator]=None, auto_hash: bool=True):
         """
         Create a new instance of "AuthenticationHandler".
 
@@ -40,10 +40,15 @@ class AuthenticationController:
             List of emails of unregistered users who are authorized to register.        
         validator: Validator, optional
             Validator object that checks the validity of the username, name, and email fields.
+        auto_hash: bool
+            Automatic hashing requirement for the user credentials, 
+            True: passwords may be provided in plain text,
+            False: passwords must be provided as hashed.
         """
         self.authentication_service = AuthenticationService(credentials,
                                                             pre_authorized,
-                                                            validator)
+                                                            validator,
+                                                            auto_hash)
         self.validator = Validator()
     def _check_captcha(self, captcha_name: str, exception: Exception, entered_captcha: str):
         """

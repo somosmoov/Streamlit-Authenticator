@@ -10,10 +10,13 @@ Libraries imported:
 from typing import Callable, Dict, List, Optional
 import streamlit as st
 
+import config
+
 from utilities.hasher import Hasher
 from utilities.validator import Validator
 from utilities.helpers import Helpers
-from utilities.exceptions import (CredentialsError,
+from utilities.exceptions import (AuthenticateError,
+                                  CredentialsError,
                                   ForgotError,
                                   LoginError,
                                   RegisterError,
@@ -26,7 +29,7 @@ class AuthenticationService:
     forgot password, forgot username, and modify user details widgets.
     """
     def __init__(self, credentials: dict, pre_authorized: Optional[List[str]]=None,
-                 validator: Optional[Validator]=None):
+                 validator: Optional[Validator]=None, auto_hash: bool=True):
         """
         Create a new instance of "AuthenticationHandler".
 
@@ -38,21 +41,32 @@ class AuthenticationService:
             List of emails of unregistered users who are authorized to register.        
         validator: Validator, optional
             Validator object that checks the validity of the username, name, and email fields.
+        auto_hash: bool
+            Automatic hashing requirement for the user credentials, 
+            True: passwords may be provided in plain text,
+            False: passwords must be provided as hashed.
         """
         self.credentials = credentials
         if self.credentials['usernames']:
-            self.credentials['usernames'] = {
-                key.lower(): value
-                for key, value in self.credentials['usernames'].items()
-                }
-            for username, _ in self.credentials['usernames'].items():
-                if 'logged_in' not in self.credentials['usernames'][username]:
-                    self.credentials['usernames'][username]['logged_in'] = False
-                if 'failed_login_attempts' not in self.credentials['usernames'][username]:
-                    self.credentials['usernames'][username]['failed_login_attempts'] = 0
-                if not Hasher._is_hash(self.credentials['usernames'][username]['password']):
-                    self.credentials['usernames'][username]['password'] = \
-                        Hasher._hash(self.credentials['usernames'][username]['password'])
+            if 'AuthenticationService.__init__' not in st.session_state:
+                st.session_state['AuthenticationService.__init__'] = None
+            if not st.session_state['AuthenticationService.__init__']:
+                self.credentials['usernames'] = {
+                    key.lower(): value
+                    for key, value in self.credentials['usernames'].items()
+                    }
+                if auto_hash and len(self.credentials['usernames']) <= config.AUTO_HASH_MAX_USERS:
+                    for username, _ in self.credentials['usernames'].items():
+                        if not Hasher._is_hash(self.credentials['usernames'][username]['password']):
+                            self.credentials['usernames'][username]['password'] = \
+                            Hasher._hash(self.credentials['usernames'][username]['password'])
+                else:
+                    raise AuthenticateError(f"""Number of users exceeds the limit for automatic
+                                            hashing. Please hash all plain text passwords in the
+                                            credentials using the Hasher.hash_credentials() method,
+                                            and set Authenticate(auto_hash=False). For more information
+                                            please refer to {config.AUTO_HASH_MAX_USERS_LINK}.""")
+                st.session_state['AuthenticationService.__init__'] = True
         else:
             self.credentials['usernames'] = {}
         self.pre_authorized = pre_authorized
@@ -96,6 +110,7 @@ class AuthenticationService:
         if username not in self.credentials['usernames']:
             return False
         if isinstance(max_login_attempts, int) and \
+            'failed_login_attempts' in self.credentials['usernames'][username] and \
             self.credentials['usernames'][username]['failed_login_attempts'] >= max_login_attempts:
             raise LoginError('Maximum number of login attempts exceeded')
         try:
@@ -117,7 +132,8 @@ class AuthenticationService:
         """
         concurrent_users = 0
         for username, _ in self.credentials['usernames'].items():
-            if self.credentials['usernames'][username]['logged_in']:
+            if 'logged_in' in self.credentials['usernames'][username] and \
+                self.credentials['usernames'][username]['logged_in']:
                 concurrent_users += 1
         return concurrent_users
     def _credentials_contains_value(self, value: str) -> bool:
@@ -284,6 +300,8 @@ class AuthenticationService:
             True: number of failed login attempts for the user will be reset to 0, 
             False: number of failed login attempts for the user will be incremented.
         """
+        if 'failed_login_attempts' not in self.credentials['usernames'][username]:
+            self.credentials['usernames'][username]['failed_login_attempts'] = 0
         if reset:
             self.credentials['usernames'][username]['failed_login_attempts'] = 0
         else:

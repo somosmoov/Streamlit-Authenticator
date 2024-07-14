@@ -13,6 +13,8 @@ import time
 from typing import Callable, Dict, List, Optional
 import streamlit as st
 
+import config
+
 from utilities.helpers import Helpers
 from utilities.validator import Validator
 from utilities.exceptions import DeprecationError, LogoutError, ResetError, UpdateError
@@ -27,7 +29,7 @@ class Authenticate:
     """
     def __init__(self, credentials: dict, cookie_name: str, cookie_key: str,
                  cookie_expiry_days: float=30.0, pre_authorized: Optional[List[str]]=None,
-                 validator: Optional[Validator]=None):
+                 validator: Optional[Validator]=None, auto_hash: bool=True):
         """
         Create a new instance of "Authenticate".
 
@@ -47,10 +49,15 @@ class Authenticate:
             List of emails of unregistered users who are authorized to register.        
         validator: Validator, optional
             Validator object that checks the validity of the username, name, and email fields.
+        auto_hash: bool
+            Automatic hashing requirement for the user credentials, 
+            True: passwords may be provided in plain text,
+            False: passwords must be provided as hashed.
         """
         self.authentication_controller  =   AuthenticationController(credentials,
                                                                      pre_authorized,
-                                                                     validator)
+                                                                     validator,
+                                                                     auto_hash)
         self.cookie_controller  =   CookieController(cookie_name,
                                                      cookie_key,
                                                      cookie_expiry_days)
@@ -217,7 +224,7 @@ class Authenticate:
             token = self.cookie_controller.get_cookie()
             if token:
                 self.authentication_controller.login(token=token)
-            time.sleep(1)
+            time.sleep(config.LOGIN_SLEEP_TIME)
             if not st.session_state['authentication_status']:
                 if location == 'main':
                     login_form = st.form(key=key, clear_on_submit=clear_on_submit)
