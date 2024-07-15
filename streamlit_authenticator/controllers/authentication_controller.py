@@ -24,7 +24,7 @@ from utilities.exceptions import (CredentialsError,
 
 class AuthenticationController:
     """
-    This class will execute the logic for the login, logout, register user, reset password, 
+    This class will control the requests for the login, logout, register user, reset password, 
     forgot password, forgot username, and modify user details widgets.
     """
     def __init__(self, credentials: dict, pre_authorized: Optional[List[str]]=None,
