@@ -50,9 +50,9 @@ class Authenticate:
         validator: Validator, optional
             Validator object that checks the validity of the username, name, and email fields.
         auto_hash: bool
-            Automatic hashing requirement for the user credentials, 
-            True: passwords may be provided in plain text,
-            False: passwords must be provided as hashed.
+            Automatic hashing requirement for the passwords, 
+            True: plain text passwords will be automatically hashed,
+            False: plain text passwords will not be automatically hashed.
         """
         self.authentication_controller  =   AuthenticationController(credentials,
                                                                      pre_authorized,
