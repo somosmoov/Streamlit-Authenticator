@@ -21,7 +21,7 @@ class CookieService:
     """
     def __init__(self, cookie_name: str, cookie_key: str, cookie_expiry_days: float):
         """
-        Create a new instance of "CookieHandler".
+        Create a new instance of "CookieService".
 
         Parameters
         ----------
