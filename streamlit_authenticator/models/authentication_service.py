@@ -60,7 +60,7 @@ class AuthenticationService:
                         if not Hasher._is_hash(self.credentials['usernames'][username]['password']):
                             self.credentials['usernames'][username]['password'] = \
                             Hasher._hash(self.credentials['usernames'][username]['password'])
-                elif len(self.credentials['usernames']) > config.AUTO_HASH_MAX_USERS:
+                elif auto_hash and len(self.credentials['usernames']) > config.AUTO_HASH_MAX_USERS:
                     raise AuthenticateError(f"""Number of users exceeds the limit for automatic
                                             hashing. Please hash all plain text passwords in the
                                             credentials using the Hasher.hash_credentials() method,
