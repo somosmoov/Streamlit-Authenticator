@@ -30,7 +30,7 @@ class AuthenticationController:
     def __init__(self, credentials: dict, pre_authorized: Optional[List[str]]=None,
                  validator: Optional[Validator]=None, auto_hash: bool=True):
         """
-        Create a new instance of "AuthenticationHandler".
+        Create a new instance of "AuthenticationController".
 
         Parameters
         ----------
