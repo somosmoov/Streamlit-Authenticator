@@ -57,12 +57,12 @@ class AuthenticationService:
                     for key, value in self.credentials['usernames'].items()
                     }
                 if auto_hash:
-                    # if len(self.credentials['usernames']) > config.AUTO_HASH_MAX_USERS:
-                    #     st.warning(f"""**Hashing in progress.** To avoid runtime delays, please
-                    #                manually pre-hash all plain text passwords in the credentials
-                    #                using the Hasher.hash_credentials() method, and set
-                    #                auto_hash=False for the Authenticate object. For more information
-                    #                please refer to {config.AUTO_HASH_MAX_USERS_LINK}.""")
+                    if len(self.credentials['usernames']) > config.AUTO_HASH_MAX_USERS:
+                        print(f"""Auto hashing in progress. To avoid runtime delays, please manually
+                              pre-hash all plain text passwords in the credentials using the
+                              Hasher.hash_credentials() method, and set auto_hash=False for the
+                              Authenticate object. For more information please refer to
+                              {config.AUTO_HASH_MAX_USERS_LINK}.""")
                     for username, _ in self.credentials['usernames'].items():
                         if not Hasher._is_hash(self.credentials['usernames'][username]['password']):
                             self.credentials['usernames'][username]['password'] = \
