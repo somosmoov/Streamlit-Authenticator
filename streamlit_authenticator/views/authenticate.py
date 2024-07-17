@@ -54,13 +54,13 @@ class Authenticate:
             True: plain text passwords will be automatically hashed,
             False: plain text passwords will not be automatically hashed.
         """
+        self.cookie_controller  =   CookieController(cookie_name,
+                                                     cookie_key,
+                                                     cookie_expiry_days)
         self.authentication_controller  =   AuthenticationController(credentials,
                                                                      pre_authorized,
                                                                      validator,
                                                                      auto_hash)
-        self.cookie_controller  =   CookieController(cookie_name,
-                                                     cookie_key,
-                                                     cookie_expiry_days)
     def forgot_password(self, location: str='main', fields: Optional[Dict[str, str]]=None,
                         captcha: bool=False, clear_on_submit: bool=False,
                         key: str='Forgot password', callback: Optional[Callable]=None) -> tuple:

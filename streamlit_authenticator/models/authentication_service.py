@@ -7,6 +7,7 @@ Libraries imported:
 - typing: Module implementing standard typing notations for Python functions.
 """
 
+import time
 from typing import Callable, Dict, List, Optional
 import streamlit as st
 
@@ -55,18 +56,17 @@ class AuthenticationService:
                     key.lower(): value
                     for key, value in self.credentials['usernames'].items()
                     }
-                if auto_hash and len(self.credentials['usernames']) <= config.AUTO_HASH_MAX_USERS:
+                if auto_hash:
+                    # if len(self.credentials['usernames']) > config.AUTO_HASH_MAX_USERS:
+                    #     st.warning(f"""**Hashing in progress.** To avoid runtime delays, please
+                    #                manually pre-hash all plain text passwords in the credentials
+                    #                using the Hasher.hash_credentials() method, and set
+                    #                auto_hash=False for the Authenticate object. For more information
+                    #                please refer to {config.AUTO_HASH_MAX_USERS_LINK}.""")
                     for username, _ in self.credentials['usernames'].items():
                         if not Hasher._is_hash(self.credentials['usernames'][username]['password']):
                             self.credentials['usernames'][username]['password'] = \
                             Hasher._hash(self.credentials['usernames'][username]['password'])
-                elif auto_hash and len(self.credentials['usernames']) > config.AUTO_HASH_MAX_USERS:
-                    raise AuthenticateError(f"""Number of users exceeds the limit for automatic
-                                            hashing. Please manually hash all plain text passwords in
-                                            the credentials using the Hasher.hash_credentials() method,
-                                            and set auto_hash=False for the Authenticate object. For
-                                            more information please refer to
-                                            {config.AUTO_HASH_MAX_USERS_LINK}.""")
                 st.session_state['AuthenticationService.__init__'] = True
         else:
             self.credentials['usernames'] = {}
