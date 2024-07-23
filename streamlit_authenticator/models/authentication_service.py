@@ -16,12 +16,9 @@ import config
 from utilities.hasher import Hasher
 from utilities.validator import Validator
 from utilities.helpers import Helpers
-from utilities.exceptions import (AuthenticateError,
-                                  CredentialsError,
-                                  ForgotError,
+from utilities.exceptions import (CredentialsError,
                                   LoginError,
                                   RegisterError,
-                                  ResetError,
                                   UpdateError)
 
 class AuthenticationService:

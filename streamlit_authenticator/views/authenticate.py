@@ -17,7 +17,7 @@ import config
 
 from utilities.helpers import Helpers
 from utilities.validator import Validator
-from utilities.exceptions import DeprecationError, LogoutError, ResetError, UpdateError
+from utilities.exceptions import LogoutError, ResetError, UpdateError
 
 from controllers import CookieController
 from controllers import AuthenticationController
@@ -176,7 +176,7 @@ class Authenticate:
     def login(self, location: str='main', max_concurrent_users: Optional[int]=None,
               max_login_attempts: Optional[int]=None, fields: Optional[Dict[str, str]]=None,
               captcha: bool=False, clear_on_submit: bool=False, key: str='Login',
-              callback: Optional[Callable]=None) -> tuple:
+              callback: Optional[Callable]=None, sleep: Optional[float]=None) -> tuple:
         """
         Creates a login widget.
 
@@ -202,6 +202,8 @@ class Authenticate:
             Unique key provided to widgets to avoid duplicate WidgetID errors.
         callback: callable, optional
             Optional callback function that will be invoked on form submission.
+        sleep: float, optional
+            Optional sleep time for the login widget.
 
         Returns
         -------
@@ -224,7 +226,7 @@ class Authenticate:
             token = self.cookie_controller.get_cookie()
             if token:
                 self.authentication_controller.login(token=token)
-            time.sleep(config.LOGIN_SLEEP_TIME)
+            time.sleep(config.LOGIN_SLEEP_TIME if sleep is None else sleep)
             if not st.session_state['authentication_status']:
                 if location == 'main':
                     login_form = st.form(key=key, clear_on_submit=clear_on_submit)

@@ -13,6 +13,7 @@ import streamlit.components.v1 as components
 from yaml.loader import SafeLoader
 
 from views.authenticate import Authenticate
+from utilities.hasher import Hasher
 from utilities.exceptions import (CredentialsError,
                                   ForgotError,
                                   LoginError,
@@ -26,6 +27,9 @@ if not _RELEASE:
     # Loading config file
     with open('../config.yaml', 'r', encoding='utf-8') as file:
         config = yaml.load(file, Loader=SafeLoader)
+
+    # Hashing all plain text passwords once
+    # Hasher.hash_credentials(config['credentials'])
 
     # Creating the authenticator object
     authenticator = Authenticate(
