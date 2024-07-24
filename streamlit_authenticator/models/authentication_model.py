@@ -7,7 +7,6 @@ Libraries imported:
 - typing: Module implementing standard typing notations for Python functions.
 """
 
-import time
 from typing import Callable, Dict, List, Optional
 import streamlit as st
 
