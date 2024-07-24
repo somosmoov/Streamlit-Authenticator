@@ -28,9 +28,9 @@ class Validator:
         bool
             Validity of entered email.
         """
-        pattern = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b"
-        return 2 < len(email) < 320 and bool(re.match(pattern, email))
-    def validate_length(self, variable: str, min_length: int=0, max_length: int=100) -> bool:
+        pattern = r"^[a-zA-Z0-9._%+-]{1,254}@[a-zA-Z0-9.-]{1,253}\.[a-zA-Z]{2,63}$"
+        return bool(re.match(pattern, email))
+    def validate_length(self, variable: str, min_length: int=0, max_length: int=254) -> bool:
         """
         Checks the length of a variable.
         
@@ -64,8 +64,8 @@ class Validator:
         bool
             Validity of entered name.
         """
-        pattern = r"^.{1,100}$"
-        return bool(re.match(pattern, name))
+        pattern = r"^[A-Za-z. ]{2,100}"
+        return bool(re.compile(pattern, name))
     def validate_password(self, password: str) -> bool:
         """
         Checks the validity of the entered password.
@@ -96,5 +96,5 @@ class Validator:
         bool
             Validity of entered username.
         """
-        pattern = r"^([a-zA-Z0-9_-]{1,20}|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$"
+        pattern = r"^([a-zA-Z0-9_-]{1,20}|[a-zA-Z0-9._%+-]{1,254}@[a-zA-Z0-9.-]{1,253}\.[a-zA-Z]{2,63})$"
         return bool(re.match(pattern, username))

@@ -13,13 +13,8 @@ from typing import Callable, Dict, List, Optional
 import streamlit as st
 
 import config
-
-from utilities.helpers import Helpers
-from utilities.validator import Validator
-from utilities.exceptions import LogoutError, ResetError, UpdateError
-
-from controllers import CookieController
-from controllers import AuthenticationController
+from controllers import AuthenticationController, CookieController
+from utilities import Helpers, LogoutError, ResetError, UpdateError, Validator
 
 class Authenticate:
     """

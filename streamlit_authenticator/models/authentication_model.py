@@ -11,14 +11,13 @@ from typing import Callable, Dict, List, Optional
 import streamlit as st
 
 import config
-
-from utilities.hasher import Hasher
-from utilities.validator import Validator
-from utilities.helpers import Helpers
-from utilities.exceptions import (CredentialsError,
-                                  LoginError,
-                                  RegisterError,
-                                  UpdateError)
+from utilities import (Hasher,
+                       Helpers,
+                       CredentialsError,
+                       LoginError,
+                       RegisterError,
+                       UpdateError,
+                       Validator)
 
 class AuthenticationModel:
     """

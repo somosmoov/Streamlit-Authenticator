@@ -11,16 +11,13 @@ from typing import Callable, Dict, List, Optional
 import streamlit as st
 
 from models import AuthenticationModel
-
-from utilities.hasher import Hasher
-from utilities.validator import Validator
-from utilities.helpers import Helpers
-from utilities.exceptions import (CredentialsError,
-                                  ForgotError,
-                                  LoginError,
-                                  RegisterError,
-                                  ResetError,
-                                  UpdateError)
+from utilities import (ForgotError,
+                       Helpers,
+                       LoginError,
+                       RegisterError,
+                       ResetError,
+                       UpdateError,
+                       Validator)
 
 class AuthenticationController:
     """
