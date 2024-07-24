@@ -1,9 +1,9 @@
 """
-Script description: This module controls requests made to the cookie service for password-less
+Script description: This module controls requests made to the cookie model for password-less
 re-authentication. 
 """
 
-from models.cookie_service import CookieService
+from models.cookie_model import CookieModel
 
 class CookieController:
     """
@@ -24,14 +24,14 @@ class CookieController:
             Number of days before the re-authentication cookie automatically expires on the client's 
             browser.
         """
-        self.cookie_service = CookieService(cookie_name,
-                                            cookie_key,
-                                            cookie_expiry_days)
+        self.cookie_model = CookieModel(cookie_name,
+                                        cookie_key,
+                                        cookie_expiry_days)
     def delete_cookie(self):
         """
         Deletes the re-authentication cookie.
         """
-        self.cookie_service.delete_cookie()
+        self.cookie_model.delete_cookie()
     def get_cookie(self):
         """
         Gets the re-authentication cookie.
@@ -41,9 +41,9 @@ class CookieController:
         str
             Re-authentication cookie.
         """
-        return self.cookie_service.get_cookie()
+        return self.cookie_model.get_cookie()
     def set_cookie(self):
         """
         Sets the re-authentication cookie.
         """
-        self.cookie_service.set_cookie()
+        self.cookie_model.set_cookie()
