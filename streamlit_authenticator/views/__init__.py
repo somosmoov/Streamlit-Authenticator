@@ -1,1 +1,1 @@
-from .authenticate import Authenticate
+from .authentication_view import Authenticate
