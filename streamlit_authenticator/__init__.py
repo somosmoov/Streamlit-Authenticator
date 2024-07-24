@@ -12,7 +12,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 from yaml.loader import SafeLoader
 
-from views.authenticate import Authenticate
+from views.authentication_view import Authenticate
 from utilities.hasher import Hasher
 from utilities.exceptions import (CredentialsError,
                                   ForgotError,
