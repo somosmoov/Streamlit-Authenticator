@@ -1,7 +1,6 @@
 """
-Script description: This module renders and invokes the logic for the
-login, logout, register user, reset password, forgot password, forgot username,
-and modify user details widgets. 
+Script description: This module renders the login, logout, register user, reset password,
+forgot password, forgot username, and modify user details widgets. 
 
 Libraries imported:
 - time: Module implementing the sleep function.
@@ -176,7 +175,7 @@ class Authenticate:
     def login(self, location: str='main', max_concurrent_users: Optional[int]=None,
               max_login_attempts: Optional[int]=None, fields: Optional[Dict[str, str]]=None,
               captcha: bool=False, clear_on_submit: bool=False, key: str='Login',
-              callback: Optional[Callable]=None, sleep: Optional[float]=None) -> tuple:
+              callback: Optional[Callable]=None, sleep_time: Optional[float]=None) -> tuple:
         """
         Creates a login widget.
 
@@ -202,7 +201,7 @@ class Authenticate:
             Unique key provided to widgets to avoid duplicate WidgetID errors.
         callback: callable, optional
             Optional callback function that will be invoked on form submission.
-        sleep: float, optional
+        sleep_time: float, optional
             Optional sleep time for the login widget.
 
         Returns
@@ -226,7 +225,7 @@ class Authenticate:
             token = self.cookie_controller.get_cookie()
             if token:
                 self.authentication_controller.login(token=token)
-            time.sleep(config.LOGIN_SLEEP_TIME if sleep is None else sleep)
+            time.sleep(config.LOGIN_SLEEP_TIME if sleep_time is None else sleep_time)
             if not st.session_state['authentication_status']:
                 if location == 'main':
                     login_form = st.form(key=key, clear_on_submit=clear_on_submit)
