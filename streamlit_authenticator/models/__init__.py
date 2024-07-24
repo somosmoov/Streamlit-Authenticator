@@ -1,2 +1,2 @@
-from .cookie_service import CookieModel
-from .authentication_service import AuthenticationModel
+from .cookie_model import CookieModel
+from .authentication_model import AuthenticationModel
