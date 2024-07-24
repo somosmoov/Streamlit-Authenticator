@@ -1,5 +1,6 @@
 """
-Script description: This module implements cookies for password-less re-authentication. 
+Script description: This module implements the logic for the cookies for password-less
+re-authentication. 
 
 Libraries imported:
 - datetime: Module implementing DateTime data types.
@@ -14,7 +15,7 @@ from jwt import DecodeError, InvalidSignatureError
 import streamlit as st
 import extra_streamlit_components as stx
 
-class CookieService:
+class CookieModel:
     """
     This class will execute all actions related to the re-authentication cookie, 
     including deleting, getting, and setting the cookie.
