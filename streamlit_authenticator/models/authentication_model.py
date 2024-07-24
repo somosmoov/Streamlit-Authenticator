@@ -20,7 +20,7 @@ from utilities.exceptions import (CredentialsError,
                                   RegisterError,
                                   UpdateError)
 
-class AuthenticationService:
+class AuthenticationModel:
     """
     This class will execute the logic for the login, logout, register user, reset password, 
     forgot password, forgot username, and modify user details widgets.
