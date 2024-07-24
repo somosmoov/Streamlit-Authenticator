@@ -1,5 +1,5 @@
 """
-Script description: This module executes the logic for the login, logout, register user,
+Script description: This module controls the requests for the login, logout, register user,
 reset password, forgot password, forgot username, and modify user details widgets. 
 
 Libraries imported:
@@ -10,7 +10,7 @@ Libraries imported:
 from typing import Callable, Dict, List, Optional
 import streamlit as st
 
-from models import AuthenticationService
+from models import AuthenticationModel
 
 from utilities.hasher import Hasher
 from utilities.validator import Validator
