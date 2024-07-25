@@ -65,7 +65,7 @@ class Validator:
             Validity of entered name.
         """
         pattern = r"^[A-Za-z. ]{2,100}"
-        return bool(re.compile(pattern, name))
+        return bool(re.match(pattern, name))
     def validate_password(self, password: str) -> bool:
         """
         Checks the validity of the entered password.
